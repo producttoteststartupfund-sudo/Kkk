@@ -56,10 +56,10 @@ fCrtCore(_len, _atrLen, _atrMult, _usePct, _maxPct) =>
     _wl = ta.lowest(low, _len)
     _in = (_wh - _wl) <= _limit
 
-    var float _boxHi = na
-    var float _boxLo = na
-    var float _crtHi = na
-    var float _crtLo = na
+    float _boxHi = na
+    float _boxLo = na
+    float _crtHi = na
+    float _crtLo = na
     if _in
         if not _in[1]
             _boxHi := high
@@ -127,11 +127,16 @@ var float mnHi = na, mnLo = na
 [w1HiNew, w1LoNew] = getLevels("W")
 [mnHiNew, mnLoNew] = getLevels("M")
 
-h1Hi := fSticky(h1HiNew, h1Hi), h1Lo := fSticky(h1LoNew, h1Lo)
-h4Hi := fSticky(h4HiNew, h4Hi), h4Lo := fSticky(h4LoNew, h4Lo)
-d1Hi := fSticky(d1HiNew, d1Hi), d1Lo := fSticky(d1LoNew, d1Lo)
-w1Hi := fSticky(w1HiNew, w1Hi), w1Lo := fSticky(w1LoNew, w1Lo)
-mnHi := fSticky(mnHiNew, mnHi), mnLo := fSticky(mnLoNew, mnLo)
+h1Hi := fSticky(h1HiNew, h1Hi)
+h1Lo := fSticky(h1LoNew, h1Lo)
+h4Hi := fSticky(h4HiNew, h4Hi)
+h4Lo := fSticky(h4LoNew, h4Lo)
+d1Hi := fSticky(d1HiNew, d1Hi)
+d1Lo := fSticky(d1LoNew, d1Lo)
+w1Hi := fSticky(w1HiNew, w1Hi)
+w1Lo := fSticky(w1LoNew, w1Lo)
+mnHi := fSticky(mnHiNew, mnHi)
+mnLo := fSticky(mnLoNew, mnLo)
 
 // ========================= Impulse Direction =========================
 impulseDir = request.security(syminfo.tickerid, dirTF, fImpulseDir(impAtrLen, impMult, impBodyFrac), barmerge.gaps_off, barmerge.lookahead_off)
@@ -145,7 +150,7 @@ var line d1HiLine = na, d1LoLine = na
 var line w1HiLine = na, w1LoLine = na
 var line mnHiLine = na, mnLoLine = na
 
-fSetLine(var line ln, float y, color col, int width) =>
+fSetLine(ln, y, col, width) =>
     if na(ln)
         ln := line.new(bar_index, y, bar_index + 1, y, extend=extend.right, color=col, width=width)
     else
@@ -229,6 +234,14 @@ alertcondition(tsS_h1 or tsS_h4 or tsS_d1 or tsS_w1 or tsS_mn, "Turtle Soup SHOR
 // ========================= Dashboard =========================
 fPos(p) => p == "Top Left" ? position.top_left : p == "Top Right" ? position.top_right : p == "Bottom Left" ? position.bottom_left : position.bottom_right
 
+// table row helper (global scope)
+fRow(tbl, r, tfName, hi, lo, col, tsLong, tsShort) =>
+    table.cell(tbl, 0, r, tfName, text_color=color.white, bgcolor=color.new(col, 85), text_halign=text.align_left, text_size=size.normal)
+    table.cell(tbl, 1, r, na(hi) ? "na" : str.tostring(hi), text_color=color.white, bgcolor=color.new(col, 92), text_halign=text.align_right, text_size=size.normal)
+    table.cell(tbl, 2, r, na(lo) ? "na" : str.tostring(lo), text_color=color.white, bgcolor=color.new(col, 92), text_halign=text.align_right, text_size=size.normal)
+    _sig = tsLong ? "TS Long" : tsShort ? "TS Short" : ""
+    table.cell(tbl, 3, r, _sig, text_color=color.white, bgcolor=color.new(col, 92), text_halign=text.align_left, text_size=size.normal)
+
 var table dash = na
 if showDashboard and barstate.islast
     if na(dash)
@@ -239,33 +252,21 @@ if showDashboard and barstate.islast
     table.cell(dash, 2, 0, "CRT Low",   text_color=color.white, bgcolor=color.new(color.black, 0))
     table.cell(dash, 3, 0, "Signal",    text_color=color.white, bgcolor=color.new(color.black, 0))
 
-    fRow(r, tfName, hi, lo, col) =>
-        table.cell(dash, 0, r, tfName, text_color=color.white, bgcolor=color.new(col, 85), text_halign=text.align_left, text_size=size.normal)
-        table.cell(dash, 1, r, na(hi) ? "na" : str.tostring(hi), text_color=color.white, bgcolor=color.new(col, 92), text_halign=text.align_right, text_size=size.normal)
-        table.cell(dash, 2, r, na(lo) ? "na" : str.tostring(lo), text_color=color.white, bgcolor=color.new(col, 92), text_halign=text.align_right, text_size=size.normal)
-        sig = ""
-        sig := (tfName == "H1"  and tsL_h1) ? "TS Long"  : (tfName == "H1"  and tsS_h1) ? "TS Short" : sig
-        sig := (tfName == "H4"  and tsL_h4) ? "TS Long"  : (tfName == "H4"  and tsS_h4) ? "TS Short" : sig
-        sig := (tfName == "D1"  and tsL_d1) ? "TS Long"  : (tfName == "D1"  and tsS_d1) ? "TS Short" : sig
-        sig := (tfName == "W1"  and tsL_w1) ? "TS Long"  : (tfName == "W1"  and tsS_w1) ? "TS Short" : sig
-        sig := (tfName == "MN"  and tsL_mn) ? "TS Long"  : (tfName == "MN"  and tsS_mn) ? "TS Short" : sig
-        table.cell(dash, 3, r, sig, text_color=color.white, bgcolor=color.new(col, 92), text_halign=text.align_left, text_size=size.normal)
-
     row = 1
     if useH1
-        fRow(row, "H1", h1Hi, h1Lo, cH1)
+        fRow(dash, row, "H1", h1Hi, h1Lo, cH1, tsL_h1, tsS_h1)
         row += 1
     if useH4
-        fRow(row, "H4", h4Hi, h4Lo, cH4)
+        fRow(dash, row, "H4", h4Hi, h4Lo, cH4, tsL_h4, tsS_h4)
         row += 1
     if useD1
-        fRow(row, "D1", d1Hi, d1Lo, cD1)
+        fRow(dash, row, "D1", d1Hi, d1Lo, cD1, tsL_d1, tsS_d1)
         row += 1
     if useW1
-        fRow(row, "W1", w1Hi, w1Lo, cW1)
+        fRow(dash, row, "W1", w1Hi, w1Lo, cW1, tsL_w1, tsS_w1)
         row += 1
     if useMN
-        fRow(row, "MN", mnHi, mnLo, cMN)
+        fRow(dash, row, "MN", mnHi, mnLo, cMN, tsL_mn, tsS_mn)
         row += 1
 
 // Impulse banner
@@ -273,7 +274,7 @@ var label impulseLbl = na
 if barstate.islast
     txt = isUpImpulse ? "Impulse: UP (" + dirTF + ")" : isDownImpulse ? "Impulse: DOWN (" + dirTF + ")" : "Impulse: None (" + dirTF + ")"
     if na(impulseLbl)
-        impulseLbl := label.new(bar_index, na, txt, xloc=xloc.bar_index, yloc=yloc.price, textcolor=color.white, style=label.style_label_left, color=color.new(color.black, 0))
+        impulseLbl := label.new(bar_index, close, txt, xloc=xloc.bar_index, yloc=yloc.price, textcolor=color.white, style=label.style_label_left, color=color.new(color.black, 0))
     else
         label.set_text(impulseLbl, txt)
         label.set_x(impulseLbl, bar_index)
