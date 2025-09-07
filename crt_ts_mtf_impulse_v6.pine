@@ -112,16 +112,25 @@ inSess = not useSession or (time(timeframe.period, sessionStr) != 0)
 
 // ========================= MTF CRT Levels =========================
 getLevels(tf) =>
-    float h = na
-    float l = na
-    [h, l] = request.security(syminfo.tickerid, tf, fCrtCore(crtLen, atrLen, atrMult, usePct, maxPct), barmerge.gaps_off, barmerge.lookahead_off)
-    [h, l]
+    float outH = na
+    float outL = na
+    float hTmp = na
+    float lTmp = na
+    [hTmp, lTmp] = request.security(syminfo.tickerid, tf, fCrtCore(crtLen, atrLen, atrMult, usePct, maxPct), barmerge.gaps_off, barmerge.lookahead_off)
+    outH := hTmp
+    outL := lTmp
+    [outH, outL]
 
-var float h1Hi = na, h1Lo = na
-var float h4Hi = na, h4Lo = na
-var float d1Hi = na, d1Lo = na
-var float w1Hi = na, w1Lo = na
-var float mnHi = na, mnLo = na
+var float h1Hi = na
+var float h1Lo = na
+var float h4Hi = na
+var float h4Lo = na
+var float d1Hi = na
+var float d1Lo = na
+var float w1Hi = na
+var float w1Lo = na
+var float mnHi = na
+var float mnLo = na
 
 float h1HiNew = na
 float h1LoNew = na
@@ -134,11 +143,28 @@ float w1LoNew = na
 float mnHiNew = na
 float mnLoNew = na
 
-[h1HiNew, h1LoNew] = getLevels("60")
-[h4HiNew, h4LoNew] = getLevels("240")
-[d1HiNew, d1LoNew] = getLevels("D")
-[w1HiNew, w1LoNew] = getLevels("W")
-[mnHiNew, mnLoNew] = getLevels("M")
+float tH1 = na, tL1 = na
+float tH4 = na, tL4 = na
+float tD1 = na, tDL = na
+float tW1 = na, tWL = na
+float tMN = na, tML = na
+
+[tH1, tL1] = getLevels("60")
+[tH4, tL4] = getLevels("240")
+[tD1, tDL] = getLevels("D")
+[tW1, tWL] = getLevels("W")
+[tMN, tML] = getLevels("M")
+
+h1HiNew := tH1
+h1LoNew := tL1
+h4HiNew := tH4
+h4LoNew := tL4
+d1HiNew := tD1
+d1LoNew := tDL
+w1HiNew := tW1
+w1LoNew := tWL
+mnHiNew := tMN
+mnLoNew := tML
 
 h1Hi := fSticky(h1HiNew, h1Hi)
 h1Lo := fSticky(h1LoNew, h1Lo)
