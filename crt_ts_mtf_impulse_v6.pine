@@ -112,7 +112,8 @@ inSess = not useSession or (time(timeframe.period, sessionStr) != 0)
 
 // ========================= MTF CRT Levels =========================
 getLevels(tf) =>
-    [h, l] = request.security(syminfo.tickerid, tf, fCrtCore(crtLen, atrLen, atrMult, usePct, maxPct), barmerge.gaps_off, barmerge.lookahead_off)
+    float h = na, l = na
+    [h, l] := request.security(syminfo.tickerid, tf, fCrtCore(crtLen, atrLen, atrMult, usePct, maxPct), barmerge.gaps_off, barmerge.lookahead_off)
     [h, l]
 
 var float h1Hi = na, h1Lo = na
@@ -121,11 +122,17 @@ var float d1Hi = na, d1Lo = na
 var float w1Hi = na, w1Lo = na
 var float mnHi = na, mnLo = na
 
-[h1HiNew, h1LoNew] = getLevels("60")
-[h4HiNew, h4LoNew] = getLevels("240")
-[d1HiNew, d1LoNew] = getLevels("D")
-[w1HiNew, w1LoNew] = getLevels("W")
-[mnHiNew, mnLoNew] = getLevels("M")
+float h1HiNew = na, h1LoNew = na
+float h4HiNew = na, h4LoNew = na
+float d1HiNew = na, d1LoNew = na
+float w1HiNew = na, w1LoNew = na
+float mnHiNew = na, mnLoNew = na
+
+[h1HiNew, h1LoNew] := getLevels("60")
+[h4HiNew, h4LoNew] := getLevels("240")
+[d1HiNew, d1LoNew] := getLevels("D")
+[w1HiNew, w1LoNew] := getLevels("W")
+[mnHiNew, mnLoNew] := getLevels("M")
 
 h1Hi := fSticky(h1HiNew, h1Hi)
 h1Lo := fSticky(h1LoNew, h1Lo)
@@ -150,7 +157,7 @@ var line d1HiLine = na, d1LoLine = na
 var line w1HiLine = na, w1LoLine = na
 var line mnHiLine = na, mnLoLine = na
 
-fSetLine(ln, y, col, width) =>
+fSetLine(line ln, float y, color col, int width) =>
     if na(ln)
         ln := line.new(bar_index, y, bar_index + 1, y, extend=extend.right, color=col, width=width)
     else
@@ -235,7 +242,7 @@ alertcondition(tsS_h1 or tsS_h4 or tsS_d1 or tsS_w1 or tsS_mn, "Turtle Soup SHOR
 fPos(p) => p == "Top Left" ? position.top_left : p == "Top Right" ? position.top_right : p == "Bottom Left" ? position.bottom_left : position.bottom_right
 
 // table row helper (global scope)
-fRow(tbl, r, tfName, hi, lo, col, tsLong, tsShort) =>
+fRow(table tbl, int r, string tfName, float hi, float lo, color col, bool tsLong, bool tsShort) =>
     table.cell(tbl, 0, r, tfName, text_color=color.white, bgcolor=color.new(col, 85), text_halign=text.align_left, text_size=size.normal)
     table.cell(tbl, 1, r, na(hi) ? "na" : str.tostring(hi), text_color=color.white, bgcolor=color.new(col, 92), text_halign=text.align_right, text_size=size.normal)
     table.cell(tbl, 2, r, na(lo) ? "na" : str.tostring(lo), text_color=color.white, bgcolor=color.new(col, 92), text_halign=text.align_right, text_size=size.normal)
@@ -272,7 +279,7 @@ if showDashboard and barstate.islast
 // Impulse banner
 var label impulseLbl = na
 if barstate.islast
-    txt = isUpImpulse ? "Impulse: UP (" + dirTF + ")" : isDownImpulse ? "Impulse: DOWN (" + dirTF + ")" : "Impulse: None (" + dirTF + ")"
+    string txt = isUpImpulse ? "Impulse: UP (" + dirTF + ")" : isDownImpulse ? "Impulse: DOWN (" + dirTF + ")" : "Impulse: None (" + dirTF + ")"
     if na(impulseLbl)
         impulseLbl := label.new(bar_index, close, txt, xloc=xloc.bar_index, yloc=yloc.price, textcolor=color.white, style=label.style_label_left, color=color.new(color.black, 0))
     else
