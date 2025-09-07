@@ -146,7 +146,7 @@ mnHi := fSticky(mnHiNew, mnHi)
 mnLo := fSticky(mnLoNew, mnLo)
 
 // ========================= Impulse Direction =========================
-impulseDir = request.security(syminfo.tickerid, dirTF, fImpulseDir(impAtrLen, impMult, impBodyFrac), barmerge.gaps_off, barmerge.lookahead_off)
+int impulseDir = request.security(syminfo.tickerid, dirTF, fImpulseDir(impAtrLen, impMult, impBodyFrac), barmerge.gaps_off, barmerge.lookahead_off)
 isUpImpulse   = impulseDir == 1
 isDownImpulse = impulseDir == -1
 
