@@ -113,7 +113,7 @@ inSess = not useSession or (time(timeframe.period, sessionStr) != 0)
 // ========================= MTF CRT Levels =========================
 getLevels(tf) =>
     float h = na, l = na
-    [h, l] := request.security(syminfo.tickerid, tf, fCrtCore(crtLen, atrLen, atrMult, usePct, maxPct), barmerge.gaps_off, barmerge.lookahead_off)
+    [h, l] = request.security(syminfo.tickerid, tf, fCrtCore(crtLen, atrLen, atrMult, usePct, maxPct), barmerge.gaps_off, barmerge.lookahead_off)
     [h, l]
 
 var float h1Hi = na, h1Lo = na
@@ -128,11 +128,11 @@ float d1HiNew = na, d1LoNew = na
 float w1HiNew = na, w1LoNew = na
 float mnHiNew = na, mnLoNew = na
 
-[h1HiNew, h1LoNew] := getLevels("60")
-[h4HiNew, h4LoNew] := getLevels("240")
-[d1HiNew, d1LoNew] := getLevels("D")
-[w1HiNew, w1LoNew] := getLevels("W")
-[mnHiNew, mnLoNew] := getLevels("M")
+[h1HiNew, h1LoNew] = getLevels("60")
+[h4HiNew, h4LoNew] = getLevels("240")
+[d1HiNew, d1LoNew] = getLevels("D")
+[w1HiNew, w1LoNew] = getLevels("W")
+[mnHiNew, mnLoNew] = getLevels("M")
 
 h1Hi := fSticky(h1HiNew, h1Hi)
 h1Lo := fSticky(h1LoNew, h1Lo)
