@@ -112,7 +112,8 @@ inSess = not useSession or (time(timeframe.period, sessionStr) != 0)
 
 // ========================= MTF CRT Levels =========================
 getLevels(tf) =>
-    float h = na, l = na
+    float h = na
+    float l = na
     [h, l] = request.security(syminfo.tickerid, tf, fCrtCore(crtLen, atrLen, atrMult, usePct, maxPct), barmerge.gaps_off, barmerge.lookahead_off)
     [h, l]
 
@@ -122,11 +123,16 @@ var float d1Hi = na, d1Lo = na
 var float w1Hi = na, w1Lo = na
 var float mnHi = na, mnLo = na
 
-float h1HiNew = na, h1LoNew = na
-float h4HiNew = na, h4LoNew = na
-float d1HiNew = na, d1LoNew = na
-float w1HiNew = na, w1LoNew = na
-float mnHiNew = na, mnLoNew = na
+float h1HiNew = na
+float h1LoNew = na
+float h4HiNew = na
+float h4LoNew = na
+float d1HiNew = na
+float d1LoNew = na
+float w1HiNew = na
+float w1LoNew = na
+float mnHiNew = na
+float mnLoNew = na
 
 [h1HiNew, h1LoNew] = getLevels("60")
 [h4HiNew, h4LoNew] = getLevels("240")
