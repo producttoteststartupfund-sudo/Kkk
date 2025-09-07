@@ -136,11 +136,16 @@ float w1LoNew = na
 float mnHiNew = na
 float mnLoNew = na
 
-float tH1 = na, tL1 = na
-float tH4 = na, tL4 = na
-float tD1 = na, tDL = na
-float tW1 = na, tWL = na
-float tMN = na, tML = na
+float tH1 = na
+float tL1 = na
+float tH4 = na
+float tL4 = na
+float tD1 = na
+float tDL = na
+float tW1 = na
+float tWL = na
+float tMN = na
+float tML = na
 
 [tH1, tL1] = getLevels("60")
 [tH4, tL4] = getLevels("240")
@@ -182,7 +187,7 @@ var line d1HiLine = na, d1LoLine = na
 var line w1HiLine = na, w1LoLine = na
 var line mnHiLine = na, mnLoLine = na
 
-fSetLine(line ln, float y, color col, int width) =>
+fSetLine(ln, y, col, width) =>
     if na(ln)
         ln := line.new(bar_index, y, bar_index + 1, y, extend=extend.right, color=col, width=width)
     else
@@ -267,7 +272,7 @@ alertcondition(tsS_h1 or tsS_h4 or tsS_d1 or tsS_w1 or tsS_mn, "Turtle Soup SHOR
 fPos(p) => p == "Top Left" ? position.top_left : p == "Top Right" ? position.top_right : p == "Bottom Left" ? position.bottom_left : position.bottom_right
 
 // table row helper (global scope)
-fRow(table tbl, int r, string tfName, float hi, float lo, color col, bool tsLong, bool tsShort) =>
+fRow(tbl, r, tfName, hi, lo, col, tsLong, tsShort) =>
     table.cell(tbl, 0, r, tfName, text_color=color.white, bgcolor=color.new(col, 85), text_halign=text.align_left, text_size=size.normal)
     table.cell(tbl, 1, r, na(hi) ? "na" : str.tostring(hi), text_color=color.white, bgcolor=color.new(col, 92), text_halign=text.align_right, text_size=size.normal)
     table.cell(tbl, 2, r, na(lo) ? "na" : str.tostring(lo), text_color=color.white, bgcolor=color.new(col, 92), text_halign=text.align_right, text_size=size.normal)
