@@ -80,7 +80,7 @@ fDispDn(_atrLen, _mult, _bodyFrac, _lb) =>
     bool _ok = close < open and _tr > ta.atr(_atrLen) * _mult and math.abs(close - open) / _tr > _bodyFrac
     not na(ta.barssince(_ok)) and ta.barssince(_ok) <= (_lb - 1)
 
-bool inSess = not useSession or (time(timeframe.period, sessionStr) != 0)
+bool inSess = not useSession or not na(time(timeframe.period, sessionStr))
 
 getCrtOn(string tf) => request.security(syminfo.tickerid, tf, fCrtCandidate(crtLen), barmerge.gaps_off, barmerge.lookahead_off)
 
@@ -93,11 +93,16 @@ var float mnHi = na, mnLo = na
 
 var int h1When = na, h4When = na, d1When = na, w1When = na, mnWhen = na
 
-[float nH1, float nL1] = getCrtOn("60")
-[float nH4, float nL4] = getCrtOn("240")
-[float nD1, float nDL] = getCrtOn("D")
-[float nW1, float nWL] = getCrtOn("W")
-[float nMN, float nML] = getCrtOn("M")
+float nH1 = na, nL1 = na
+float nH4 = na, nL4 = na
+float nD1 = na, nDL = na
+float nW1 = na, nWL = na
+float nMN = na, nML = na
+[nH1, nL1] = getCrtOn("60")
+[nH4, nL4] = getCrtOn("240")
+[nD1, nDL] = getCrtOn("D")
+[nW1, nWL] = getCrtOn("W")
+[nMN, nML] = getCrtOn("M")
 
 if not na(nH1) and not na(nL1)
     h1Hi := nH1
