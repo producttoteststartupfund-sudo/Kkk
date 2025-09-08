@@ -136,7 +136,7 @@ var line d1HiLine = na, d1LoLine = na
 var line w1HiLine = na, w1LoLine = na
 var line mnHiLine = na, mnLoLine = na
 
-fLine(line existing, float y, color col, int width) =>
+fLine(existing, y, col, width) =>
     line ln = existing
     if na(ln)
         ln := line.new(bar_index, y, bar_index + 1, y, extend=extend.right, color=col, width=width)
@@ -163,8 +163,8 @@ if useMN and not na(mnHi) and not na(mnLo)
     mnHiLine := fLine(mnHiLine, mnHi, cMN, 2)
     mnLoLine := fLine(mnLoLine, mnLo, cMN, 2)
 
-tsLong(float level)  => low < level  and (not needCloseIn or close > level)
-tsShort(float level) => high > level and (not needCloseIn or close < level)
+tsLong(level)  => low < level  and (not needCloseIn or close > level)
+tsShort(level) => high > level and (not needCloseIn or close < level)
 
 bool dirOKLong  = isUpImpulse   or not hideOpp
 bool dirOKShort = isDownImpulse or not hideOpp
@@ -221,7 +221,7 @@ if showDash and barstate.islast
     table.cell(dash, 2, 0, "CRT Low",   text_color=color.white, bgcolor=color.new(color.black, 0))
     table.cell(dash, 3, 0, "Signal",    text_color=color.white, bgcolor=color.new(color.black, 0))
 
-    fRow(int r, string tfName, float hi, float lo, color col, bool tsL, bool tsS) =>
+    fRow(r, tfName, hi, lo, col, tsL, tsS) =>
         table.cell(dash, 0, r, tfName, text_color=color.white, bgcolor=color.new(col, 85), text_halign=text.align_left)
         table.cell(dash, 1, r, na(hi) ? "na" : str.tostring(hi), text_color=color.white, bgcolor=color.new(col, 92), text_halign=text.align_right)
         table.cell(dash, 2, r, na(lo) ? "na" : str.tostring(lo), text_color=color.white, bgcolor=color.new(col, 92), text_halign=text.align_right)
