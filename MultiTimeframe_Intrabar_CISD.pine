@@ -1,0 +1,500 @@
+//@version=5
+indicator("Multi-Timeframe Intrabar (with CISD)", overlay=true, max_lines_count=500, max_labels_count=500, max_bars_back = 5000)
+
+// Explicitly set max_bars_back for key variables
+max_bars_back(time, 5000)
+max_bars_back(high, 5000)
+max_bars_back(low, 5000)
+max_bars_back(close, 5000)
+max_bars_back(open, 5000)
+
+// Inputs
+var g_TF = "Timeframes"
+use_tf1         = input.bool(true, "30 Minutes", inline = "TF1", group = g_TF)
+tf1             = input.timeframe("30", "", inline = "TF1", group = g_TF)
+tf1_color       = input.color(color.new(#FF1493, 70), "", inline = "TF1", group = g_TF)
+use_tf1_mid     = input.bool(true, "50% Level", inline = "TF1M", group = g_TF)
+tf1_mid_color   = input.color(color.new(#FF1493, 50), "", inline = "TF1M", group = g_TF)
+
+use_tf2         = input.bool(true, "1 Hour", inline = "TF2", group = g_TF)
+tf2             = input.timeframe("60", "", inline = "TF2", group = g_TF)
+tf2_color       = input.color(color.new(#FF4500, 70), "", inline = "TF2", group = g_TF)
+use_tf2_mid     = input.bool(true, "50% Level", inline = "TF2M", group = g_TF)
+tf2_mid_color   = input.color(color.new(#FF4500, 50), "", inline = "TF2M", group = g_TF)
+
+use_tf3         = input.bool(true, "2 Hours", inline = "TF3", group = g_TF)
+tf3             = input.timeframe("120", "", inline = "TF3", group = g_TF)
+tf3_color       = input.color(color.new(#32CD32, 70), "", inline = "TF3", group = g_TF)
+use_tf3_mid     = input.bool(true, "50% Level", inline = "TF3M", group = g_TF)
+tf3_mid_color   = input.color(color.new(#32CD32, 50), "", inline = "TF3M", group = g_TF)
+
+use_tf4         = input.bool(true, "4 Hours", inline = "TF4", group = g_TF)
+tf4             = input.timeframe("240", "", inline = "TF4", group = g_TF)
+tf4_color       = input.color(color.new(#1E90FF, 70), "", inline = "TF4", group = g_TF)
+use_tf4_mid     = input.bool(true, "50% Level", inline = "TF4M", group = g_TF)
+tf4_mid_color   = input.color(color.new(#1E90FF, 50), "", inline = "TF4M", group = g_TF)
+
+use_tf5         = input.bool(true, "Daily", inline = "TF5", group = g_TF)
+tf5             = input.timeframe("D", "", inline = "TF5", group = g_TF)
+tf5_color       = input.color(color.new(#9932CC, 70), "", inline = "TF5", group = g_TF)
+use_tf5_mid     = input.bool(true, "50% Level", inline = "TF5M", group = g_TF)
+tf5_mid_color   = input.color(color.new(#9932CC, 50), "", inline = "TF5M", group = g_TF)
+
+use_tf6         = input.bool(true, "Weekly", inline = "TF6", group = g_TF)
+tf6             = input.timeframe("W", "", inline = "TF6", group = g_TF)
+tf6_color       = input.color(color.new(#FFD700, 70), "", inline = "TF6", group = g_TF)
+use_tf6_mid     = input.bool(true, "50% Level", inline = "TF6M", group = g_TF)
+tf6_mid_color   = input.color(color.new(#FFD700, 50), "", inline = "TF6M", group = g_TF)
+
+use_tf7         = input.bool(true, "Monthly", inline = "TF7", group = g_TF)
+tf7             = input.timeframe("M", "", inline = "TF7", group = g_TF)
+tf7_color       = input.color(color.new(#FF69B4, 70), "", inline = "TF7", group = g_TF)
+use_tf7_mid     = input.bool(true, "50% Level", inline = "TF7M", group = g_TF)
+tf7_mid_color   = input.color(color.new(#FF69B4, 50), "", inline = "TF7M", group = g_TF)
+
+var g_ALERT = "Alert Options"
+alert_on_m30   = input.bool(false, "Alert on M30 touch", group = g_ALERT)
+alert_on_h1    = input.bool(false, "Alert on H1 touch", group = g_ALERT)
+alert_on_h2    = input.bool(false, "Alert on H2 touch", group = g_ALERT)
+alert_on_h4    = input.bool(false, "Alert on H4 touch", group = g_ALERT)
+alert_on_daily = input.bool(false, "Alert on Daily touch", group = g_ALERT)
+alert_on_weekly = input.bool(false, "Alert on Weekly touch", group = g_ALERT)
+alert_on_monthly = input.bool(false, "Alert on Monthly touch", group = g_ALERT)
+
+// CISD alert toggles (folded into same Alerts group)
+alert_on_h1_cisd     = input.bool(false, "Alert on H1→1m CISD", group = g_ALERT)
+alert_on_h4_cisd     = input.bool(false, "Alert on H4→5m CISD", group = g_ALERT)
+alert_on_daily_cisd  = input.bool(false, "Alert on D→15m CISD", group = g_ALERT)
+alert_on_weekly_cisd = input.bool(false, "Alert on W→30m CISD", group = g_ALERT)
+alert_on_monthly_cisd = input.bool(false, "Alert on M→60m CISD", group = g_ALERT)
+
+var g_OPT = "Options"
+minbars         = input.int(1, "Minimum Bars", group = g_OPT)
+maxbars         = input.int(250, "Maximum Bars", group = g_OPT)
+hllinewidth     = input.int(2, "High/Low Line Width", group = g_OPT)
+midlinewidth    = input.int(1, "Mid Line Width", group = g_OPT)
+
+// CISD options
+var g_CISD = "CISD Options"
+enable_cisd_all  = input.bool(true, "Enable CISD suite", group=g_CISD)
+show_cisd_shapes = input.bool(true, "Plot CISD shapes", group=g_CISD)
+cisd_bull_color  = input.color(color.teal, "CISD Bull Color", group=g_CISD)
+cisd_bear_color  = input.color(color.red,  "CISD Bear Color", group=g_CISD)
+
+var g_LABEL = "Label Options"
+bullishLabelStyle = input.string("Label Up", "Bullish Label Style", options=[  "None", "Label Up", "Label Down", "Label Left", "Label Right", "Label Center",   "Triangle Up", "Triangle Down", "Triangle Left", "Triangle Right",   "Flag", "Circle", "Square", "Diamond", "Cross", "X-Cross", "Arrow Up", "Arrow Down" ], group=g_LABEL)
+bearishLabelStyle = input.string("Label Down", "Bearish Label Style", options=[ "None", "Label Up", "Label Down", "Label Left", "Label Right", "Label Center", "Triangle Up", "Triangle Down", "Triangle Left", "Triangle Right", "Flag", "Circle", "Square", "Diamond",  "Cross", "X-Cross", "Arrow Up", "Arrow Down"  ], group=g_LABEL)
+labelSize = input.string("Small", "Label Size", options=["Auto", "Tiny", "Small", "Normal", "Large", "Huge"], group=g_LABEL)
+
+bullishBgColor = input.color(color.new(color.green, 50), "Bullish Background Color", group=g_LABEL)
+bullishTextColor = input.color(color.green, "Bullish Text Color", group=g_LABEL)
+bearishBgColor = input.color(color.new(color.red, 50), "Bearish Background Color", group=g_LABEL)
+bearishTextColor = input.color(color.red, "Bearish Text Color", group=g_LABEL)
+
+show_m30_labels = input.bool(true, "Show M30 Labels", group = g_LABEL)
+show_h1_labels  = input.bool(true, "Show H1 Labels", group = g_LABEL)
+show_h2_labels  = input.bool(true, "Show H2 Labels", group = g_LABEL)
+show_h4_labels  = input.bool(true, "Show H4 Labels", group = g_LABEL)
+show_daily_labels = input.bool(true, "Show Daily Labels", group = g_LABEL)
+show_weekly_labels = input.bool(true, "Show Weekly Labels", group = g_LABEL)
+show_monthly_labels = input.bool(true, "Show Monthly Labels", group = g_LABEL)
+show_cisd_labels = input.bool(true, "Show CISD Labels", group = g_LABEL)
+max_labels      = input.int(50, "Maximum number of labels to show", minval=1, maxval=500, group = g_LABEL)
+show_eol_labels = input.bool(true, "Show End-of-Line Labels", group = g_LABEL)
+eol_label_offset = input.int(5, "End-of-Line Label Offset", minval=1, maxval=50, group = g_LABEL)
+
+var g_TOUCH = "Touch Options"
+use_wick_touch = input.bool(true, "Use Wick Touch", group=g_TOUCH)
+use_body_touch = input.bool(true, "Use Body Touch", group=g_TOUCH)
+
+// Modified process_tf function
+process_tf(tf) =>
+    var float rangeHigh = na
+    var float rangeLow = na
+    var float rangeMid = na
+    var int rangeStart = 0
+    var bool inConsolidation = true
+    var bool bullishTouch = false
+    var bool bearishTouch = false
+    
+    [tfOpen, tfHigh, tfLow, tfClose, tfTime] = request.security(syminfo.tickerid, tf, [open, high, low, close, time], barmerge.gaps_off, barmerge.lookahead_on)
+    
+    newBar = ta.change(tfTime) != 0
+    
+    tfUp = tfHigh
+    tfDown = tfLow
+    tfChildUp = tfOpen > tfClose ? tfOpen : tfClose
+    tfChildDown = tfOpen > tfClose ? tfClose : tfOpen
+    
+    if newBar
+        upControl = tfChildUp > rangeHigh and bar_index - rangeStart > minbars and bar_index - rangeStart <= maxbars
+        downControl = tfChildDown < rangeLow and bar_index - rangeStart > minbars and bar_index - rangeStart <= maxbars
+        
+        if (upControl or downControl)
+            inConsolidation := false
+        
+        if (inConsolidation and tfChildDown <= rangeHigh and tfChildDown >= rangeLow and tfChildUp <= rangeHigh and tfChildUp >= rangeLow and bar_index > 1)
+            rangeStart := rangeStart
+        else
+            rangeHigh := tfHigh
+            rangeLow := tfLow
+            rangeStart := bar_index
+            inConsolidation := true
+        
+        if not inConsolidation and (bar_index - rangeStart > maxbars or bar_index - rangeStart < minbars)
+            inConsolidation := true
+        
+        rangeMid := (rangeHigh + rangeLow) / 2
+        bullishTouch := false
+        bearishTouch := false
+    
+    if inConsolidation
+        bullishWickTouch = low < rangeLow and close > rangeLow and high < rangeHigh
+        bullishBodyTouch = open < rangeLow and close > rangeLow
+        bearishWickTouch = high > rangeHigh and close < rangeHigh and low > rangeLow
+        bearishBodyTouch = open > rangeHigh and close < rangeHigh
+        
+        bullishTouch := (use_wick_touch and bullishWickTouch) or (use_body_touch and bullishBodyTouch)
+        bearishTouch := (use_wick_touch and bearishWickTouch) or (use_body_touch and bearishBodyTouch)
+    
+    [rangeHigh, rangeLow, rangeMid, rangeStart, inConsolidation, newBar, bullishTouch, bearishTouch]
+
+// Process data for each timeframe
+[high1, low1, mid1, start1, inRange1, newBar1, bullishTouch1, bearishTouch1] = process_tf(tf1)
+[high2, low2, mid2, start2, inRange2, newBar2, bullishTouch2, bearishTouch2] = process_tf(tf2)
+[high3, low3, mid3, start3, inRange3, newBar3, bullishTouch3, bearishTouch3] = process_tf(tf3)
+[high4, low4, mid4, start4, inRange4, newBar4, bullishTouch4, bearishTouch4] = process_tf(tf4)
+[high5, low5, mid5, start5, inRange5, newBar5, bullishTouch5, bearishTouch5] = process_tf(tf5)
+[high6, low6, mid6, start6, inRange6, newBar6, bullishTouch6, bearishTouch6] = process_tf(tf6)
+[high7, low7, mid7, start7, inRange7, newBar7, bullishTouch7, bearishTouch7] = process_tf(tf7)
+
+// Modified plot_lines function
+plot_lines(tfColor, midColor, high, low, mid, start, inRange, newBar, useMid, bullishTouch, bearishTouch, tfName) =>
+    var line highLine = na
+    var line lowLine = na
+    var line midLine = na
+    var label highLabel = na
+    var label lowLabel = na
+    
+    if newBar and inRange
+        if not na(highLine)
+            line.delete(highLine)
+            line.delete(lowLine)
+            line.delete(midLine)
+        if not na(highLabel)
+            label.delete(highLabel)
+            label.delete(lowLabel)
+        
+        validStart = math.max(start, 0)
+        highLine := line.new(validStart, high, bar_index, high, color=tfColor, width=hllinewidth)
+        lowLine := line.new(validStart, low, bar_index, low, color=tfColor, width=hllinewidth)
+        if useMid
+            midLine := line.new(validStart, mid, bar_index, mid, color=midColor, width=midlinewidth, style=line.style_dashed)
+        
+        if show_eol_labels
+            highLabel := label.new(bar_index + eol_label_offset, high, text=tfName + " CRT High", color=color.new(tfColor, 70), textcolor=tfColor, style=label.style_none, size=size.small)
+            lowLabel := label.new(bar_index + eol_label_offset, low, text=tfName + " CRT Low", color=color.new(tfColor, 70), textcolor=tfColor, style=label.style_none, size=size.small)
+    
+    if not na(highLine) and inRange
+        line.set_x2(highLine, bar_index)
+        line.set_x2(lowLine, bar_index)
+        if useMid and not na(midLine)
+            line.set_x2(midLine, bar_index)
+        
+        if show_eol_labels
+            label.set_x(highLabel, bar_index + eol_label_offset)
+            label.set_y(highLabel, high)
+            label.set_x(lowLabel, bar_index + eol_label_offset)
+            label.set_y(lowLabel, low)
+    
+    [bullishTouch, bearishTouch]
+
+// Plot lines for each timeframe
+if use_tf1
+    [bullishTouch1, bearishTouch1] = plot_lines(tf1_color, tf1_mid_color, high1, low1, mid1, start1, inRange1, newBar1, use_tf1_mid, bullishTouch1, bearishTouch1, "M30")
+if use_tf2
+    [bullishTouch2, bearishTouch2] = plot_lines(tf2_color, tf2_mid_color, high2, low2, mid2, start2, inRange2, newBar2, use_tf2_mid, bullishTouch2, bearishTouch2, "H1")
+if use_tf3
+    [bullishTouch3, bearishTouch3] = plot_lines(tf3_color, tf3_mid_color, high3, low3, mid3, start3, inRange3, newBar3, use_tf3_mid, bullishTouch3, bearishTouch3, "H2")
+if use_tf4
+    [bullishTouch4, bearishTouch4] = plot_lines(tf4_color, tf4_mid_color, high4, low4, mid4, start4, inRange4, newBar4, use_tf4_mid, bullishTouch4, bearishTouch4, "H4")
+if use_tf5
+    [bullishTouch5, bearishTouch5] = plot_lines(tf5_color, tf5_mid_color, high5, low5, mid5, start5, inRange5, newBar5, use_tf5_mid, bullishTouch5, bearishTouch5, "D")
+if use_tf6
+    [bullishTouch6, bearishTouch6] = plot_lines(tf6_color, tf6_mid_color, high6, low6, mid6, start6, inRange6, newBar6, use_tf6_mid, bullishTouch6, bearishTouch6, "W")
+if use_tf7
+    [bullishTouch7, bearishTouch7] = plot_lines(tf7_color, tf7_mid_color, high7, low7, mid7, start7, inRange7, newBar7, use_tf7_mid, bullishTouch7, bearishTouch7, "M")
+
+// Function to convert string input to label style
+getLabelStyle(styleString) =>
+    switch styleString
+        "None" => label.style_none
+        "Label Up" => label.style_label_up
+        "Label Down" => label.style_label_down
+        "Label Left" => label.style_label_left
+        "Label Right" => label.style_label_right
+        "Label Center" => label.style_label_center
+        "Triangle Up" => label.style_triangleup
+        "Triangle Down" => label.style_triangledown
+        "Triangle Left" => label.style_triangleleft
+        "Triangle Right" => label.style_triangleright
+        "Flag" => label.style_flag
+        "Circle" => label.style_circle
+        "Square" => label.style_square
+        "Diamond" => label.style_diamond
+        "Cross" => label.style_cross
+        "X-Cross" => label.style_xcross
+        "Arrow Up" => label.style_arrowup
+        "Arrow Down" => label.style_arrowdown
+        => label.style_label_up
+
+// Convert string input to size
+getLabelSize(sizeString) =>
+    switch sizeString
+        "Auto" => size.auto
+        "Tiny" => size.tiny
+        "Small" => size.small
+        "Normal" => size.normal
+        "Large" => size.large
+        "Huge" => size.huge
+        => size.auto
+
+// Optimized label management
+var label[] labels = array.new_label()
+
+manageLabelCount(labelText, y, bgColor, textColor, style, size) =>
+    if array.size(labels) >= max_labels
+        label.delete(array.shift(labels))
+    newLabel = label.new(bar_index, y, labelText, color=bgColor, textcolor=textColor, style=style, size=size)
+    array.push(labels, newLabel)
+
+// Function to check and create labels for a timeframe
+checkAndCreateLabel(show, bullishTouch, bearishTouch, tfText) =>
+    if show and bullishTouch
+        manageLabelCount("BT-" + tfText, low, bullishBgColor, bullishTextColor, getLabelStyle(bullishLabelStyle), getLabelSize(labelSize))
+    if show and bearishTouch
+        manageLabelCount("BT-" + tfText, high, bearishBgColor, bearishTextColor, getLabelStyle(bearishLabelStyle), getLabelSize(labelSize))
+
+// Apply labels for each timeframe
+checkAndCreateLabel(show_m30_labels, bullishTouch1, bearishTouch1, "M30")
+checkAndCreateLabel(show_h1_labels, bullishTouch2, bearishTouch2, "H1")
+checkAndCreateLabel(show_h2_labels, bullishTouch3, bearishTouch3, "H2")
+checkAndCreateLabel(show_h4_labels, bullishTouch4, bearishTouch4, "H4")
+checkAndCreateLabel(show_daily_labels, bullishTouch5, bearishTouch5, "D")
+checkAndCreateLabel(show_weekly_labels, bullishTouch6, bearishTouch6, "W")
+checkAndCreateLabel(show_monthly_labels, bullishTouch7, bearishTouch7, "M")
+
+// Touch Alerts
+if alert_on_m30 and (bullishTouch1 or bearishTouch1)
+    alert("M30 touch detected", alert.freq_once_per_bar_close)
+
+if alert_on_h1 and (bullishTouch2 or bearishTouch2)
+    alert("H1 touch detected", alert.freq_once_per_bar_close)
+
+if alert_on_h2 and (bullishTouch3 or bearishTouch3)
+    alert("H2 touch detected", alert.freq_once_per_bar_close)
+
+if alert_on_h4 and (bullishTouch4 or bearishTouch4)
+    alert("H4 touch detected", alert.freq_once_per_bar_close)
+
+if alert_on_daily and (bullishTouch5 or bearishTouch5)
+    alert("Daily touch detected", alert.freq_once_per_bar_close)
+
+if alert_on_weekly and (bullishTouch6 or bearishTouch6)
+    alert("Weekly touch detected", alert.freq_once_per_bar_close)
+
+if alert_on_monthly and (bullishTouch7 or bearishTouch7)
+    alert("Monthly touch detected", alert.freq_once_per_bar_close)
+
+// =========================
+// CISD Implementation
+// =========================
+
+// CISD series evaluated on LTF while tracking HTF state; returns -1 (bear), 0 (none), 1 (bull)
+cisd_series(htfStr) =>
+    var float o0 = open, var float h0 = high, var float l0 = low, var float c0 = close
+    var int   t0 = time
+    var int   h0bar = bar_index, var int l0bar = bar_index
+
+    var float o1 = open, var float h1 = high, var float l1 = low, var float c1 = close
+    var int   t1 = time
+
+    var bool  h_swept1 = false, var bool l_swept1 = false
+
+    var float bull_level = 1000000.0, var int bull_index = bar_index
+    var float bear_level = 0.0,       var int bear_index = bar_index
+    var bool  lock_bull = false, var bool lock_bear = false
+
+    if timeframe.change(htfStr)
+        t0 := time
+        o0 := open
+        h0 := high
+        l0 := low
+    if high >= h0
+        h0 := high
+        h0bar := bar_index
+    if low <= l0
+        l0 := low
+        l0bar := bar_index
+    c0 := close
+
+    if timeframe.change(htfStr)
+        o1 := o0[1]
+        h1 := h0[1]
+        l1 := l0[1]
+        t1 := t0[1]
+        c1 := close[1]
+
+    h_swept = h0 > h1 and math.max(o0, c0) < h1
+    l_swept = l0 < l1 and math.min(o0, c0) > l1
+    if timeframe.change(htfStr)
+        h_swept1 := h_swept[1]
+        l_swept1 := l_swept[1]
+
+    up = close > open
+    dw = close < open
+    eq = close == open
+
+    // Release locks when HTF extends again
+    if high >= h0[1]
+        lock_bear := false
+    if low <= l0[1]
+        lock_bull := false
+
+    // Build potential bull level (after HTF low sweep)
+    if low == l0 and low < l1
+        if (dw or eq) and (up[1] or eq[1]) and not (eq and eq[1])
+            bull_level := open
+            bull_index := bar_index
+        else
+            for i = 2 to 10
+                if low[i] < low
+                    break
+                if (up[i] or eq[i]) and dw[i - 1]
+                    b = i - 1
+                    bull_level := open[b]
+                    bull_index := bar_index - b
+                    if i > 1 and open[i - 2] > bull_level
+                        bull_index := bar_index - (i - 2)
+                        bull_level := open[i - 2]
+                    if bull_level < open and not (close > open)
+                        bull_level := open
+                        bull_index := bar_index
+                    if bull_level < open and close > open
+                        bull_level := high
+                        bull_index := bar_index
+                    break
+
+    // Build potential bear level (after HTF high sweep)
+    if high == h0 and high > h1
+        if (up or eq) and (dw[1] or eq[1]) and not (eq and eq[1])
+            bear_level := open
+            bear_index := bar_index
+        else
+            for i = 2 to 10
+                if high[i] > high
+                    break
+                if (dw[i] or eq[i]) and up[i - 1]
+                    y = i - 1
+                    bear_level := open[y]
+                    bear_index := bar_index - y
+                    if i > 1 and open[i - 2] < bear_level
+                        bear_index := bar_index - (i - 2)
+                        bear_level := open[i - 2]
+                    if bear_level > open and not (close < open)
+                        bear_level := open
+                        bear_index := bar_index
+                    if bear_level > open and close < open
+                        bear_level := low
+                        bear_index := bar_index
+                    break
+
+    bull_trig = close[1] > bull_level and (l_swept[1] or (l1 <= l0 and l_swept1)) and not lock_bull and bar_index - 1 >= bull_index
+    bear_trig = close[1] < bear_level and (h_swept[1] or (h1 >= h0 and h_swept1)) and not lock_bear and bar_index - 1 >= bear_index
+
+    if bull_trig
+        lock_bull := true
+    if bear_trig
+        lock_bear := true
+
+    bull_trig ? 1 : bear_trig ? -1 : 0
+
+cisd_signal_for_pair(htfStr, ltfStr) =>
+    request.security(syminfo.tickerid, ltfStr, cisd_series(htfStr), lookahead=barmerge.lookahead_on)
+
+// Compute CISD signals for mapped pairs
+var int cisd_h1 = na, cisd_h4 = na, cisd_d1 = na, cisd_w1 = na, cisd_m1 = na
+if enable_cisd_all
+    cisd_h1 := use_tf2 ? cisd_signal_for_pair(tf2, "1")  : na   // H1 → 1m
+    cisd_h4 := use_tf4 ? cisd_signal_for_pair(tf4, "5")  : na   // H4 → 5m
+    cisd_d1 := use_tf5 ? cisd_signal_for_pair(tf5, "15") : na   // D  → 15m
+    cisd_w1 := use_tf6 ? cisd_signal_for_pair(tf6, "30") : na   // W  → 30m
+    cisd_m1 := use_tf7 ? cisd_signal_for_pair(tf7, "60") : na   // M  → 60m
+
+bull_h1 = enable_cisd_all and cisd_h1 == 1
+bear_h1 = enable_cisd_all and cisd_h1 == -1
+bull_h4 = enable_cisd_all and cisd_h4 == 1
+bear_h4 = enable_cisd_all and cisd_h4 == -1
+bull_d1 = enable_cisd_all and cisd_d1 == 1
+bear_d1 = enable_cisd_all and cisd_d1 == -1
+bull_w1 = enable_cisd_all and cisd_w1 == 1
+bear_w1 = enable_cisd_all and cisd_w1 == -1
+bull_m1 = enable_cisd_all and cisd_m1 == 1
+bear_m1 = enable_cisd_all and cisd_m1 == -1
+
+// CISD shapes
+if show_cisd_shapes
+    plotshape(bull_h1, title="CISD H1→1m Bull", style=shape.arrowup,   location=location.belowbar, color=cisd_bull_color, size=size.tiny, text="CISD H1", textcolor=color.white, offset=-1)
+    plotshape(bear_h1, title="CISD H1→1m Bear", style=shape.arrowdown, location=location.abovebar, color=cisd_bear_color, size=size.tiny, text="CISD H1", textcolor=color.white, offset=-1)
+
+    plotshape(bull_h4, title="CISD H4→5m Bull", style=shape.arrowup,   location=location.belowbar, color=cisd_bull_color, size=size.tiny, text="CISD H4", textcolor=color.white, offset=-1)
+    plotshape(bear_h4, title="CISD H4→5m Bear", style=shape.arrowdown, location=location.abovebar, color=cisd_bear_color, size=size.tiny, text="CISD H4", textcolor=color.white, offset=-1)
+
+    plotshape(bull_d1, title="CISD D→15m Bull", style=shape.arrowup,   location=location.belowbar, color=cisd_bull_color, size=size.tiny, text="CISD D", textcolor=color.white, offset=-1)
+    plotshape(bear_d1, title="CISD D→15m Bear", style=shape.arrowdown, location=location.abovebar, color=cisd_bear_color, size=size.tiny, text="CISD D", textcolor=color.white, offset=-1)
+
+    plotshape(bull_w1, title="CISD W→30m Bull", style=shape.arrowup,   location=location.belowbar, color=cisd_bull_color, size=size.tiny, text="CISD W", textcolor=color.white, offset=-1)
+    plotshape(bear_w1, title="CISD W→30m Bear", style=shape.arrowdown, location=location.abovebar, color=cisd_bear_color, size=size.tiny, text="CISD W", textcolor=color.white, offset=-1)
+
+    plotshape(bull_m1, title="CISD M→60m Bull", style=shape.arrowup,   location=location.belowbar, color=cisd_bull_color, size=size.tiny, text="CISD M", textcolor=color.white, offset=-1)
+    plotshape(bear_m1, title="CISD M→60m Bear", style=shape.arrowdown, location=location.abovebar, color=cisd_bear_color, size=size.tiny, text="CISD M", textcolor=color.white, offset=-1)
+
+// CISD labels via label manager
+if show_cisd_labels
+    if bull_h1
+        manageLabelCount("CISD+ H1", low,  bullishBgColor, bullishTextColor, getLabelStyle(bullishLabelStyle), getLabelSize(labelSize))
+    if bear_h1
+        manageLabelCount("CISD- H1", high, bearishBgColor, bearishTextColor, getLabelStyle(bearishLabelStyle), getLabelSize(labelSize))
+
+    if bull_h4
+        manageLabelCount("CISD+ H4", low,  bullishBgColor, bullishTextColor, getLabelStyle(bullishLabelStyle), getLabelSize(labelSize))
+    if bear_h4
+        manageLabelCount("CISD- H4", high, bearishBgColor, bearishTextColor, getLabelStyle(bearishLabelStyle), getLabelSize(labelSize))
+
+    if bull_d1
+        manageLabelCount("CISD+ D",  low,  bullishBgColor, bullishTextColor, getLabelStyle(bullishLabelStyle), getLabelSize(labelSize))
+    if bear_d1
+        manageLabelCount("CISD- D",  high, bearishBgColor, bearishTextColor, getLabelStyle(bearishLabelStyle), getLabelSize(labelSize))
+
+    if bull_w1
+        manageLabelCount("CISD+ W",  low,  bullishBgColor, bullishTextColor, getLabelStyle(bullishLabelStyle), getLabelSize(labelSize))
+    if bear_w1
+        manageLabelCount("CISD- W",  high, bearishBgColor, bearishTextColor, getLabelStyle(bearishLabelStyle), getLabelSize(labelSize))
+
+    if bull_m1
+        manageLabelCount("CISD+ M",  low,  bullishBgColor, bullishTextColor, getLabelStyle(bullishLabelStyle), getLabelSize(labelSize))
+    if bear_m1
+        manageLabelCount("CISD- M",  high, bearishBgColor, bearishTextColor, getLabelStyle(bearishLabelStyle), getLabelSize(labelSize))
+
+// CISD Alerts
+if alert_on_h1_cisd and (bull_h1 or bear_h1)
+    alert("CISD H1→1m signal", alert.freq_once_per_bar_close)
+if alert_on_h4_cisd and (bull_h4 or bear_h4)
+    alert("CISD H4→5m signal", alert.freq_once_per_bar_close)
+if alert_on_daily_cisd and (bull_d1 or bear_d1)
+    alert("CISD D→15m signal", alert.freq_once_per_bar_close)
+if alert_on_weekly_cisd and (bull_w1 or bear_w1)
+    alert("CISD W→30m signal", alert.freq_once_per_bar_close)
+if alert_on_monthly_cisd and (bull_m1 or bear_m1)
+    alert("CISD M→60m signal", alert.freq_once_per_bar_close)
+
