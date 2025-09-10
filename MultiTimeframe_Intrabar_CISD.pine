@@ -348,8 +348,8 @@ cisd_series(htfStr) =>
     h_swept = h0 > h1 and math.max(o0, c0) < h1
     l_swept = l0 < l1 and math.min(o0, c0) > l1
     if timeframe.change(htfStr)
-        h_swept1 := h_swept[1]
-        l_swept1 := l_swept[1]
+        h_swept1 := nz(h_swept[1], false)
+        l_swept1 := nz(l_swept[1], false)
 
     up = close > open
     dw = close < open
@@ -423,7 +423,7 @@ cisd_signal_for_pair(htfStr, ltfStr) =>
     request.security(syminfo.tickerid, ltfStr, cisd_series(htfStr), lookahead=barmerge.lookahead_on)
 
 // Compute CISD signals for mapped pairs
-var int cisd_h1 = na, cisd_h4 = na, cisd_d1 = na, cisd_w1 = na, cisd_m1 = na
+var float cisd_h1 = na, cisd_h4 = na, cisd_d1 = na, cisd_w1 = na, cisd_m1 = na
 if enable_cisd_all
     cisd_h1 := use_tf2 ? cisd_signal_for_pair(tf2, "1")  : na   // H1 → 1m
     cisd_h4 := use_tf4 ? cisd_signal_for_pair(tf4, "5")  : na   // H4 → 5m
