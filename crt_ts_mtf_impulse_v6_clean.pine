@@ -212,6 +212,14 @@ alertcondition(tsS_h1 or tsS_h4 or tsS_d1 or tsS_w1 or tsS_mn, "Turtle Soup SHOR
 // Dashboard
 fPos(p) => p == "Top Left" ? position.top_left : p == "Top Right" ? position.top_right : p == "Bottom Left" ? position.bottom_left : position.bottom_right
 
+// Table row helper must be declared at top scope in Pine v6
+fRow(table tbl, int r, string tfName, float hi, float lo, color col, bool tsL, bool tsS) =>
+    table.cell(tbl, 0, r, tfName, text_color=color.white, bgcolor=color.new(col, 85), text_halign=text.align_left)
+    table.cell(tbl, 1, r, na(hi) ? "na" : str.tostring(hi), text_color=color.white, bgcolor=color.new(col, 92), text_halign=text.align_right)
+    table.cell(tbl, 2, r, na(lo) ? "na" : str.tostring(lo), text_color=color.white, bgcolor=color.new(col, 92), text_halign=text.align_right)
+    string _sig = tsL ? "TS Long" : tsS ? "TS Short" : ""
+    table.cell(tbl, 3, r, _sig, text_color=color.white, bgcolor=color.new(col, 92), text_halign=text.align_left)
+
 var table dash = na
 if showDash and barstate.islast
     if na(dash)
@@ -221,28 +229,21 @@ if showDash and barstate.islast
     table.cell(dash, 2, 0, "CRT Low",   text_color=color.white, bgcolor=color.new(color.black, 0))
     table.cell(dash, 3, 0, "Signal",    text_color=color.white, bgcolor=color.new(color.black, 0))
 
-    fRow(r, tfName, hi, lo, col, tsL, tsS) =>
-        table.cell(dash, 0, r, tfName, text_color=color.white, bgcolor=color.new(col, 85), text_halign=text.align_left)
-        table.cell(dash, 1, r, na(hi) ? "na" : str.tostring(hi), text_color=color.white, bgcolor=color.new(col, 92), text_halign=text.align_right)
-        table.cell(dash, 2, r, na(lo) ? "na" : str.tostring(lo), text_color=color.white, bgcolor=color.new(col, 92), text_halign=text.align_right)
-        string _sig = tsL ? "TS Long" : tsS ? "TS Short" : ""
-        table.cell(dash, 3, r, _sig, text_color=color.white, bgcolor=color.new(col, 92), text_halign=text.align_left)
-
     int row = 1
     if useH1
-        fRow(row, "H1", h1Hi, h1Lo, cH1, tsL_h1, tsS_h1)
+        fRow(dash, row, "H1", h1Hi, h1Lo, cH1, tsL_h1, tsS_h1)
         row += 1
     if useH4
-        fRow(row, "H4", h4Hi, h4Lo, cH4, tsL_h4, tsS_h4)
+        fRow(dash, row, "H4", h4Hi, h4Lo, cH4, tsL_h4, tsS_h4)
         row += 1
     if useD1
-        fRow(row, "D1", d1Hi, d1Lo, cD1, tsL_d1, tsS_d1)
+        fRow(dash, row, "D1", d1Hi, d1Lo, cD1, tsL_d1, tsS_d1)
         row += 1
     if useW1
-        fRow(row, "W1", w1Hi, w1Lo, cW1, tsL_w1, tsS_w1)
+        fRow(dash, row, "W1", w1Hi, w1Lo, cW1, tsL_w1, tsS_w1)
         row += 1
     if useMN
-        fRow(row, "MN", mnHi, mnLo, cMN, tsL_mn, tsS_mn)
+        fRow(dash, row, "MN", mnHi, mnLo, cMN, tsL_mn, tsS_mn)
         row += 1
 
 // Impulse banner
