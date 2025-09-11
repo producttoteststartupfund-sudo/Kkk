@@ -407,59 +407,19 @@ cisd_logic(htf, ltf, current_bull_level, current_bear_level, current_bull_index,
 
 // Apply CISD logic for each timeframe
 if use_tf2
-    h1_result = cisd_logic(tf2, "1", h1_bull_level, h1_bear_level, h1_bull_index, h1_bear_index, h1_bull_alarm, h1_bear_alarm, h1_xcisd, h1_ycisd)
-    h1_bull_level := h1_result[0]
-    h1_bear_level := h1_result[1]
-    h1_bull_index := h1_result[2]
-    h1_bear_index := h1_result[3]
-    h1_bull_alarm := h1_result[4]
-    h1_bear_alarm := h1_result[5]
-    h1_xcisd := h1_result[6]
-    h1_ycisd := h1_result[7]
+    [h1_bull_level, h1_bear_level, h1_bull_index, h1_bear_index, h1_bull_alarm, h1_bear_alarm, h1_xcisd, h1_ycisd] := cisd_logic(tf2, "1", h1_bull_level, h1_bear_level, h1_bull_index, h1_bear_index, h1_bull_alarm, h1_bear_alarm, h1_xcisd, h1_ycisd)
 
 if use_tf4
-    h4_result = cisd_logic(tf4, "5", h4_bull_level, h4_bear_level, h4_bull_index, h4_bear_index, h4_bull_alarm, h4_bear_alarm, h4_xcisd, h4_ycisd)
-    h4_bull_level := h4_result[0]
-    h4_bear_level := h4_result[1]
-    h4_bull_index := h4_result[2]
-    h4_bear_index := h4_result[3]
-    h4_bull_alarm := h4_result[4]
-    h4_bear_alarm := h4_result[5]
-    h4_xcisd := h4_result[6]
-    h4_ycisd := h4_result[7]
+    [h4_bull_level, h4_bear_level, h4_bull_index, h4_bear_index, h4_bull_alarm, h4_bear_alarm, h4_xcisd, h4_ycisd] := cisd_logic(tf4, "5", h4_bull_level, h4_bear_level, h4_bull_index, h4_bear_index, h4_bull_alarm, h4_bear_alarm, h4_xcisd, h4_ycisd)
 
 if use_tf5
-    d_result = cisd_logic(tf5, "15", d_bull_level, d_bear_level, d_bull_index, d_bear_index, d_bull_alarm, d_bear_alarm, d_xcisd, d_ycisd)
-    d_bull_level := d_result[0]
-    d_bear_level := d_result[1]
-    d_bull_index := d_result[2]
-    d_bear_index := d_result[3]
-    d_bull_alarm := d_result[4]
-    d_bear_alarm := d_result[5]
-    d_xcisd := d_result[6]
-    d_ycisd := d_result[7]
+    [d_bull_level, d_bear_level, d_bull_index, d_bear_index, d_bull_alarm, d_bear_alarm, d_xcisd, d_ycisd] := cisd_logic(tf5, "15", d_bull_level, d_bear_level, d_bull_index, d_bear_index, d_bull_alarm, d_bear_alarm, d_xcisd, d_ycisd)
 
 if use_tf6
-    w_result = cisd_logic(tf6, "30", w_bull_level, w_bear_level, w_bull_index, w_bear_index, w_bull_alarm, w_bear_alarm, w_xcisd, w_ycisd)
-    w_bull_level := w_result[0]
-    w_bear_level := w_result[1]
-    w_bull_index := w_result[2]
-    w_bear_index := w_result[3]
-    w_bull_alarm := w_result[4]
-    w_bear_alarm := w_result[5]
-    w_xcisd := w_result[6]
-    w_ycisd := w_result[7]
+    [w_bull_level, w_bear_level, w_bull_index, w_bear_index, w_bull_alarm, w_bear_alarm, w_xcisd, w_ycisd] := cisd_logic(tf6, "30", w_bull_level, w_bear_level, w_bull_index, w_bear_index, w_bull_alarm, w_bear_alarm, w_xcisd, w_ycisd)
 
 if use_tf7
-    m_result = cisd_logic(tf7, "60", m_bull_level, m_bear_level, m_bull_index, m_bear_index, m_bull_alarm, m_bear_alarm, m_xcisd, m_ycisd)
-    m_bull_level := m_result[0]
-    m_bear_level := m_result[1]
-    m_bull_index := m_result[2]
-    m_bear_index := m_result[3]
-    m_bull_alarm := m_result[4]
-    m_bear_alarm := m_result[5]
-    m_xcisd := m_result[6]
-    m_ycisd := m_result[7]
+    [m_bull_level, m_bear_level, m_bull_index, m_bear_index, m_bull_alarm, m_bear_alarm, m_xcisd, m_ycisd] := cisd_logic(tf7, "60", m_bull_level, m_bear_level, m_bull_index, m_bear_index, m_bull_alarm, m_bear_alarm, m_xcisd, m_ycisd)
 
 // Optimized label management
 var label[] labels = array.new_label()
@@ -540,4 +500,4 @@ plotshape(w_bull_alarm, title="Weekly Bullish CISD", style=shape.arrowup, locati
 plotshape(w_bear_alarm, title="Weekly Bearish CISD", style=shape.arrowdown, location=location.abovebar, color=color.new(color.gray, 0), size=size.tiny, text="", textcolor=color.red, offset=-1)
 
 plotshape(m_bull_alarm, title="Monthly Bullish CISD", style=shape.arrowup, location=location.belowbar, color=color.new(color.pink, 0), size=size.tiny, text="", textcolor=color.green, offset=-1)
-plotshape(m_bear_alarm, title="Monthly Bearish CISD", style=shape.arrowdown, location=location.abovebar, color=color.new(color.navy, 0), size=size.tiny, text="", textcolor=color.red, offset=-1)
+plotshape(m_bear_alarm, title="Monthly Bearish CISD", style=shape.arrowdown, location=location.abovebar, color=color.new(color.blue, 0), size=size.tiny, text="", textcolor=color.red, offset=-1)
