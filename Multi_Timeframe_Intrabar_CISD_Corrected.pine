@@ -102,7 +102,7 @@ alert_on_cisd_h1     = input.bool(false, "Alert on H1 CISD (1m)", group=g_CISD)
 alert_on_cisd_h4     = input.bool(false, "Alert on H4 CISD (5m)", group=g_CISD)
 alert_on_cisd_daily  = input.bool(false, "Alert on Daily CISD (15m)", group=g_CISD)
 alert_on_cisd_weekly = input.bool(false, "Alert on Weekly CISD (30m)", group=g_CISD)
-alert_on_cisd_month  = input.bool(false, "Alert on Monthly CISD (1h)", group=g_CISD)
+alert_on_cisd_monthly = input.bool(false, "Alert on Monthly CISD (1h)", group=g_CISD)
 
 // Modified process_tf function
 process_tf(tf) =>
@@ -304,8 +304,8 @@ var bool m_bear_alarm = false
 var bool m_xcisd = false
 var bool m_ycisd = false
 
-// CISD function for each timeframe
-cisd_logic(htf, ltf, bull_level, bear_level, bull_index, bear_index, bull_alarm, bear_alarm, xcisd, ycisd) =>
+// CISD function for each timeframe - returns values instead of modifying arguments
+cisd_logic(htf, ltf, current_bull_level, current_bear_level, current_bull_index, current_bear_index, current_bull_alarm, current_bear_alarm, current_xcisd, current_ycisd) =>
     // Get HTF data
     [htf_o, htf_h, htf_l, htf_c] = request.security(syminfo.tickerid, htf, [open, high, low, close], barmerge.gaps_off, barmerge.lookahead_on)
     
@@ -321,79 +321,89 @@ cisd_logic(htf, ltf, bull_level, bear_level, bull_index, bear_index, bull_alarm,
     h_swept = htf_h > htf_h[1] and math.max(htf_o, htf_c) < htf_h[1]
     l_swept = htf_l < htf_l[1] and math.min(htf_o, htf_c) > htf_l[1]
     
+    // Initialize return values
+    new_bull_level = current_bull_level
+    new_bear_level = current_bear_level
+    new_bull_index = current_bull_index
+    new_bear_index = current_bear_index
+    new_bull_alarm = current_bull_alarm
+    new_bear_alarm = current_bear_alarm
+    new_xcisd = current_xcisd
+    new_ycisd = current_ycisd
+    
     // Bullish CISD logic
     if low == htf_l and low < htf_l[1]
         if (dw[0] or eq[0]) and (up[1] or eq[1]) and not (eq[0] and eq[1])
-            bull_level := open
-            bull_index := bar_index
+            new_bull_level := open
+            new_bull_index := bar_index
         else
             for i = 2 to 10
                 if low[i] < low
                     break
                 if (up[i] or eq[i]) and dw[i-1]
                     bar = i - 1
-                    bull_level := open[bar]
-                    bull_index := bar_index - bar
+                    new_bull_level := open[bar]
+                    new_bull_index := bar_index - bar
                     for j = bar to 0
-                        if open[j] > bull_level and dw[j]
-                            bull_level := open[j]
-                            bull_index := bar_index - j
+                        if open[j] > new_bull_level and dw[j]
+                            new_bull_level := open[j]
+                            new_bull_index := bar_index - j
                     
-                    if bull_level < open and not (close > open)
-                        bull_level := open
-                        bull_index := bar_index
-                    if bull_level < open and (close > open)
-                        bull_level := high
-                        bull_index := bar_index
+                    if new_bull_level < open and not (close > open)
+                        new_bull_level := open
+                        new_bull_index := bar_index
+                    if new_bull_level < open and (close > open)
+                        new_bull_level := high
+                        new_bull_index := bar_index
                     break
     
     // Bearish CISD logic
     if high == htf_h and high > htf_h[1]
         if (up[0] or eq[0]) and (dw[1] or eq[1]) and not (eq[0] and eq[1])
-            bear_level := open
-            bear_index := bar_index
+            new_bear_level := open
+            new_bear_index := bar_index
         else
             for i = 2 to 10
                 if high[i] > high
                     break
                 if (dw[i] or eq[i]) and up[i-1]
                     ybar = i - 1
-                    bear_level := open[ybar]
-                    bear_index := bar_index - ybar
+                    new_bear_level := open[ybar]
+                    new_bear_index := bar_index - ybar
                     for j = ybar to 0
-                        if open[j] < bear_level and up[j]
-                            bear_level := open[j]
-                            bear_index := bar_index - j
+                        if open[j] < new_bear_level and up[j]
+                            new_bear_level := open[j]
+                            new_bear_index := bar_index - j
                     
-                    if bear_level > open and not (close < open)
-                        bear_level := open
-                        bear_index := bar_index
-                    if bear_level > open and (close < open)
-                        bear_level := low
-                        bear_index := bar_index
+                    if new_bear_level > open and not (close < open)
+                        new_bear_level := open
+                        new_bear_index := bar_index
+                    if new_bear_level > open and (close < open)
+                        new_bear_level := low
+                        new_bear_index := bar_index
                     break
     
     // Reset CISD flags
     if high >= htf_h[1]
-        ycisd := false
+        new_ycisd := false
     if low <= htf_l[1]
-        xcisd := false
+        new_xcisd := false
     
     // CISD intersection logic
-    xbull = close[1] > bull_level and (l_swept[1] or (htf_l[1] <= htf_l and l_swept[1])) and xcisd == false and bar_index-1 >= bull_index
-    xbear = close[1] < bear_level and (h_swept[1] or (htf_h[1] >= htf_h and h_swept[1])) and ycisd == false and bar_index-1 >= bear_index
+    xbull = close[1] > new_bull_level and (l_swept[1] or (htf_l[1] <= htf_l and l_swept[1])) and new_xcisd == false and bar_index-1 >= new_bull_index
+    xbear = close[1] < new_bear_level and (h_swept[1] or (htf_h[1] >= htf_h and h_swept[1])) and new_ycisd == false and bar_index-1 >= new_bear_index
     
     if xbull
-        bull_alarm := true
-        bull_level := 1000000.0
-        xcisd := true
+        new_bull_alarm := true
+        new_bull_level := 1000000.0
+        new_xcisd := true
     
     if xbear
-        bear_alarm := true
-        bear_level := 0.0
-        ycisd := true
+        new_bear_alarm := true
+        new_bear_level := 0.0
+        new_ycisd := true
     
-    [bull_level, bear_level, bull_index, bear_index, bull_alarm, bear_alarm, xcisd, ycisd]
+    [new_bull_level, new_bear_level, new_bull_index, new_bear_index, new_bull_alarm, new_bear_alarm, new_xcisd, new_ycisd]
 
 // Apply CISD logic for each timeframe
 if use_tf2
@@ -477,17 +487,17 @@ if alert_on_cisd_monthly and (m_bull_alarm or m_bear_alarm)
     alert("CISD: Monthly(1h) " + (m_bull_alarm ? "Bullish" : "Bearish"), alert.freq_once_per_bar_close)
 
 // Plot CISD shapes
-plotshape(h1_bull_alarm, title="H1 Bullish CISD", style=shape.arrowup, location=location.belowbar, color=color.teal, size=size.tiny, text="", textcolor=color.green, offset=-1)
-plotshape(h1_bear_alarm, title="H1 Bearish CISD", style=shape.arrowdown, location=location.abovebar, color=color.red, size=size.tiny, text="", textcolor=color.red, offset=-1)
+plotshape(h1_bull_alarm, title="H1 Bullish CISD", style=shape.arrowup, location=location.belowbar, color=color.new(color.teal, 0), size=size.tiny, text="", textcolor=color.green, offset=-1)
+plotshape(h1_bear_alarm, title="H1 Bearish CISD", style=shape.arrowdown, location=location.abovebar, color=color.new(color.red, 0), size=size.tiny, text="", textcolor=color.red, offset=-1)
 
-plotshape(h4_bull_alarm, title="H4 Bullish CISD", style=shape.arrowup, location=location.belowbar, color=color.blue, size=size.tiny, text="", textcolor=color.green, offset=-1)
-plotshape(h4_bear_alarm, title="H4 Bearish CISD", style=shape.arrowdown, location=location.abovebar, color=color.orange, size=size.tiny, text="", textcolor=color.red, offset=-1)
+plotshape(h4_bull_alarm, title="H4 Bullish CISD", style=shape.arrowup, location=location.belowbar, color=color.new(color.blue, 0), size=size.tiny, text="", textcolor=color.green, offset=-1)
+plotshape(h4_bear_alarm, title="H4 Bearish CISD", style=shape.arrowdown, location=location.abovebar, color=color.new(color.orange, 0), size=size.tiny, text="", textcolor=color.red, offset=-1)
 
-plotshape(d_bull_alarm, title="Daily Bullish CISD", style=shape.arrowup, location=location.belowbar, color=color.purple, size=size.tiny, text="", textcolor=color.green, offset=-1)
-plotshape(d_bear_alarm, title="Daily Bearish CISD", style=shape.arrowdown, location=location.abovebar, color=color.maroon, size=size.tiny, text="", textcolor=color.red, offset=-1)
+plotshape(d_bull_alarm, title="Daily Bullish CISD", style=shape.arrowup, location=location.belowbar, color=color.new(color.purple, 0), size=size.tiny, text="", textcolor=color.green, offset=-1)
+plotshape(d_bear_alarm, title="Daily Bearish CISD", style=shape.arrowdown, location=location.abovebar, color=color.new(color.maroon, 0), size=size.tiny, text="", textcolor=color.red, offset=-1)
 
-plotshape(w_bull_alarm, title="Weekly Bullish CISD", style=shape.arrowup, location=location.belowbar, color=color.yellow, size=size.tiny, text="", textcolor=color.green, offset=-1)
-plotshape(w_bear_alarm, title="Weekly Bearish CISD", style=shape.arrowdown, location=location.abovebar, color=color.gray, size=size.tiny, text="", textcolor=color.red, offset=-1)
+plotshape(w_bull_alarm, title="Weekly Bullish CISD", style=shape.arrowup, location=location.belowbar, color=color.new(color.yellow, 0), size=size.tiny, text="", textcolor=color.green, offset=-1)
+plotshape(w_bear_alarm, title="Weekly Bearish CISD", style=shape.arrowdown, location=location.abovebar, color=color.new(color.gray, 0), size=size.tiny, text="", textcolor=color.red, offset=-1)
 
-plotshape(m_bull_alarm, title="Monthly Bullish CISD", style=shape.arrowup, location=location.belowbar, color=color.pink, size=size.tiny, text="", textcolor=color.green, offset=-1)
-plotshape(m_bear_alarm, title="Monthly Bearish CISD", style=shape.arrowdown, location=location.abovebar, color=color.navy, size=size.tiny, text="", textcolor=color.red, offset=-1)
+plotshape(m_bull_alarm, title="Monthly Bullish CISD", style=shape.arrowup, location=location.belowbar, color=color.new(color.pink, 0), size=size.tiny, text="", textcolor=color.green, offset=-1)
+plotshape(m_bear_alarm, title="Monthly Bearish CISD", style=shape.arrowdown, location=location.abovebar, color=color.new(color.navy, 0), size=size.tiny, text="", textcolor=color.red, offset=-1)
