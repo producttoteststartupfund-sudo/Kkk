@@ -539,5 +539,5 @@ plotshape(d_bear_alarm, title="Daily Bearish CISD", style=shape.arrowdown, locat
 plotshape(w_bull_alarm, title="Weekly Bullish CISD", style=shape.arrowup, location=location.belowbar, color=color.new(color.yellow, 0), size=size.tiny, text="", textcolor=color.green, offset=-1)
 plotshape(w_bear_alarm, title="Weekly Bearish CISD", style=shape.arrowdown, location=location.abovebar, color=color.new(color.gray, 0), size=size.tiny, text="", textcolor=color.red, offset=-1)
 
-plotshape(m_bull_alarm, title="Monthly Bullish CISD", style=shape.arrowup, location=location.belowbar, color=color.new(color.pink, 0), size=size.tiny, text="", textcolor=color.green, offset=-1)
+plotshape(m_bull_alarm, title="Monthly Bullish CISD", style=shape.arrowup, location=location.belowbar, color=color.new(color.fuchsia, 0), size=size.tiny, text="", textcolor=color.green, offset=-1)
 plotshape(m_bear_alarm, title="Monthly Bearish CISD", style=shape.arrowdown, location=location.abovebar, color=color.new(color.blue, 0), size=size.tiny, text="", textcolor=color.red, offset=-1)
