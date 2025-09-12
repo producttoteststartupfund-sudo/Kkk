@@ -485,18 +485,85 @@ checkAndCreateLabel(show_daily_labels, bullishTouch5, bearishTouch5, "D")
 checkAndCreateLabel(show_weekly_labels, bullishTouch6, bearishTouch6, "W")
 checkAndCreateLabel(show_monthly_labels, bullishTouch7, bearishTouch7, "M")
 
+// Track last normal touch per TF to gate CISD
+var int h1_touch_ix = na
+var int h4_touch_ix = na
+var int d_touch_ix = na
+var int w_touch_ix = na
+var int m_touch_ix = na
+var int h1_touch_dir = 0   // +1 bull, -1 bear
+var int h4_touch_dir = 0
+var int d_touch_dir = 0
+var int w_touch_dir = 0
+var int m_touch_dir = 0
+
+if use_tf2
+    if bullishTouch2
+        h1_touch_ix := bar_index
+        h1_touch_dir := 1
+    if bearishTouch2
+        h1_touch_ix := bar_index
+        h1_touch_dir := -1
+
+if use_tf4
+    if bullishTouch4
+        h4_touch_ix := bar_index
+        h4_touch_dir := 1
+    if bearishTouch4
+        h4_touch_ix := bar_index
+        h4_touch_dir := -1
+
+if use_tf5
+    if bullishTouch5
+        d_touch_ix := bar_index
+        d_touch_dir := 1
+    if bearishTouch5
+        d_touch_ix := bar_index
+        d_touch_dir := -1
+
+if use_tf6
+    if bullishTouch6
+        w_touch_ix := bar_index
+        w_touch_dir := 1
+    if bearishTouch6
+        w_touch_ix := bar_index
+        w_touch_dir := -1
+
+if use_tf7
+    if bullishTouch7
+        m_touch_ix := bar_index
+        m_touch_dir := 1
+    if bearishTouch7
+        m_touch_ix := bar_index
+        m_touch_dir := -1
+
 // Show CISD labels
 if show_cisd_labels
-    if use_tf2 and (h1_bull_alarm or h1_bear_alarm)
-        label.new(bar_index, h1_bull_alarm ? low : high, text=h1_bull_alarm ? "CISD H1(1m) +" : "CISD H1(1m) -", style=label.style_label_up, textcolor=cisd_text_color, color=h1_bull_alarm ? cisd_label_color_bull : cisd_label_color_bear, size=size.tiny)
-    if use_tf4 and (h4_bull_alarm or h4_bear_alarm)
-        label.new(bar_index, h4_bull_alarm ? low : high, text=h4_bull_alarm ? "CISD H4(5m) +" : "CISD H4(5m) -", style=label.style_label_up, textcolor=cisd_text_color, color=h4_bull_alarm ? cisd_label_color_bull : cisd_label_color_bear, size=size.tiny)
-    if use_tf5 and (d_bull_alarm or d_bear_alarm)
-        label.new(bar_index, d_bull_alarm ? low : high, text=d_bull_alarm ? "CISD D(15m) +" : "CISD D(15m) -", style=label.style_label_up, textcolor=cisd_text_color, color=d_bull_alarm ? cisd_label_color_bull : cisd_label_color_bear, size=size.tiny)
-    if use_tf6 and (w_bull_alarm or w_bear_alarm)
-        label.new(bar_index, w_bull_alarm ? low : high, text=w_bull_alarm ? "CISD W(30m) +" : "CISD W(30m) -", style=label.style_label_up, textcolor=cisd_text_color, color=w_bull_alarm ? cisd_label_color_bull : cisd_label_color_bear, size=size.tiny)
-    if use_tf7 and (m_bull_alarm or m_bear_alarm)
-        label.new(bar_index, m_bull_alarm ? low : high, text=m_bull_alarm ? "CISD M(1h) +" : "CISD M(1h) -", style=label.style_label_up, textcolor=cisd_text_color, color=m_bull_alarm ? cisd_label_color_bull : cisd_label_color_bear, size=size.tiny)
+    // Gate CISD by requiring a prior normal touch in same direction
+    h1_cisd_ok_bull = use_tf2 and h1_bull_alarm and (h1_touch_dir == 1) and not na(h1_touch_ix) and (bar_index >= h1_touch_ix)
+    h1_cisd_ok_bear = use_tf2 and h1_bear_alarm and (h1_touch_dir == -1) and not na(h1_touch_ix) and (bar_index >= h1_touch_ix)
+    if h1_cisd_ok_bull or h1_cisd_ok_bear
+        label.new(bar_index, h1_cisd_ok_bull ? low : high, text=h1_cisd_ok_bull ? "CISD H1(1m) +" : "CISD H1(1m) -", style=label.style_label_up, textcolor=cisd_text_color, color=h1_cisd_ok_bull ? cisd_label_color_bull : cisd_label_color_bear, size=size.tiny)
+
+    h4_cisd_ok_bull = use_tf4 and h4_bull_alarm and (h4_touch_dir == 1) and not na(h4_touch_ix) and (bar_index >= h4_touch_ix)
+    h4_cisd_ok_bear = use_tf4 and h4_bear_alarm and (h4_touch_dir == -1) and not na(h4_touch_ix) and (bar_index >= h4_touch_ix)
+    if h4_cisd_ok_bull or h4_cisd_ok_bear
+        label.new(bar_index, h4_cisd_ok_bull ? low : high, text=h4_cisd_ok_bull ? "CISD H4(5m) +" : "CISD H4(5m) -", style=label.style_label_up, textcolor=cisd_text_color, color=h4_cisd_ok_bull ? cisd_label_color_bull : cisd_label_color_bear, size=size.tiny)
+
+    d_cisd_ok_bull = use_tf5 and d_bull_alarm and (d_touch_dir == 1) and not na(d_touch_ix) and (bar_index >= d_touch_ix)
+    d_cisd_ok_bear = use_tf5 and d_bear_alarm and (d_touch_dir == -1) and not na(d_touch_ix) and (bar_index >= d_touch_ix)
+    if d_cisd_ok_bull or d_cisd_ok_bear
+        label.new(bar_index, d_cisd_ok_bull ? low : high, text=d_cisd_ok_bull ? "CISD D(15m) +" : "CISD D(15m) -", style=label.style_label_up, textcolor=cisd_text_color, color=d_cisd_ok_bull ? cisd_label_color_bull : cisd_label_color_bear, size=size.tiny)
+
+    w_cisd_ok_bull = use_tf6 and w_bull_alarm and (w_touch_dir == 1) and not na(w_touch_ix) and (bar_index >= w_touch_ix)
+    w_cisd_ok_bear = use_tf6 and w_bear_alarm and (w_touch_dir == -1) and not na(w_touch_ix) and (bar_index >= w_touch_ix)
+    if w_cisd_ok_bull or w_cisd_ok_bear
+        label.new(bar_index, w_cisd_ok_bull ? low : high, text=w_cisd_ok_bull ? "CISD W(30m) +" : "CISD W(30m) -", style=label.style_label_up, textcolor=cisd_text_color, color=w_cisd_ok_bull ? cisd_label_color_bull : cisd_label_color_bear, size=size.tiny)
+
+    m_cisd_ok_bull = use_tf7 and m_bull_alarm and (m_touch_dir == 1) and not na(m_touch_ix) and (bar_index >= m_touch_ix)
+    m_cisd_ok_bear = use_tf7 and m_bear_alarm and (m_touch_dir == -1) and not na(m_touch_ix) and (bar_index >= m_touch_ix)
+    if m_cisd_ok_bull or m_cisd_ok_bear
+        label.new(bar_index, m_cisd_ok_bull ? low : high, text=m_cisd_ok_bull ? "CISD M(1h) +" : "CISD M(1h) -", style=label.style_label_up, textcolor=cisd_text_color, color=m_cisd_ok_bull ? cisd_label_color_bull : cisd_label_color_bear, size=size.tiny)
 
 // Alerts on touches
 if alert_on_m30 and (bullishTouch1 or bearishTouch1)
