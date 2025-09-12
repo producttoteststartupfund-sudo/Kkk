@@ -407,19 +407,59 @@ cisd_logic(htf, ltf, current_bull_level, current_bear_level, current_bull_index,
 
 // Apply CISD logic for each timeframe
 if use_tf2
-    [h1_bull_level, h1_bear_level, h1_bull_index, h1_bear_index, h1_bull_alarm, h1_bear_alarm, h1_xcisd, h1_ycisd] = cisd_logic(tf2, "1", h1_bull_level, h1_bear_level, h1_bull_index, h1_bear_index, h1_bull_alarm, h1_bear_alarm, h1_xcisd, h1_ycisd)
+    [tmp_h1_bl, tmp_h1_bel, tmp_h1_bi, tmp_h1_bei, tmp_h1_ba, tmp_h1_bea, tmp_h1_x, tmp_h1_y] = cisd_logic(tf2, "1", h1_bull_level, h1_bear_level, h1_bull_index, h1_bear_index, h1_bull_alarm, h1_bear_alarm, h1_xcisd, h1_ycisd)
+    h1_bull_level := tmp_h1_bl
+    h1_bear_level := tmp_h1_bel
+    h1_bull_index := tmp_h1_bi
+    h1_bear_index := tmp_h1_bei
+    h1_bull_alarm := tmp_h1_ba
+    h1_bear_alarm := tmp_h1_bea
+    h1_xcisd := tmp_h1_x
+    h1_ycisd := tmp_h1_y
 
 if use_tf4
-    [h4_bull_level, h4_bear_level, h4_bull_index, h4_bear_index, h4_bull_alarm, h4_bear_alarm, h4_xcisd, h4_ycisd] = cisd_logic(tf4, "5", h4_bull_level, h4_bear_level, h4_bull_index, h4_bear_index, h4_bull_alarm, h4_bear_alarm, h4_xcisd, h4_ycisd)
+    [tmp_h4_bl, tmp_h4_bel, tmp_h4_bi, tmp_h4_bei, tmp_h4_ba, tmp_h4_bea, tmp_h4_x, tmp_h4_y] = cisd_logic(tf4, "5", h4_bull_level, h4_bear_level, h4_bull_index, h4_bear_index, h4_bull_alarm, h4_bear_alarm, h4_xcisd, h4_ycisd)
+    h4_bull_level := tmp_h4_bl
+    h4_bear_level := tmp_h4_bel
+    h4_bull_index := tmp_h4_bi
+    h4_bear_index := tmp_h4_bei
+    h4_bull_alarm := tmp_h4_ba
+    h4_bear_alarm := tmp_h4_bea
+    h4_xcisd := tmp_h4_x
+    h4_ycisd := tmp_h4_y
 
 if use_tf5
-    [d_bull_level, d_bear_level, d_bull_index, d_bear_index, d_bull_alarm, d_bear_alarm, d_xcisd, d_ycisd] = cisd_logic(tf5, "15", d_bull_level, d_bear_level, d_bull_index, d_bear_index, d_bull_alarm, d_bear_alarm, d_xcisd, d_ycisd)
+    [tmp_d_bl, tmp_d_bel, tmp_d_bi, tmp_d_bei, tmp_d_ba, tmp_d_bea, tmp_d_x, tmp_d_y] = cisd_logic(tf5, "15", d_bull_level, d_bear_level, d_bull_index, d_bear_index, d_bull_alarm, d_bear_alarm, d_xcisd, d_ycisd)
+    d_bull_level := tmp_d_bl
+    d_bear_level := tmp_d_bel
+    d_bull_index := tmp_d_bi
+    d_bear_index := tmp_d_bei
+    d_bull_alarm := tmp_d_ba
+    d_bear_alarm := tmp_d_bea
+    d_xcisd := tmp_d_x
+    d_ycisd := tmp_d_y
 
 if use_tf6
-    [w_bull_level, w_bear_level, w_bull_index, w_bear_index, w_bull_alarm, w_bear_alarm, w_xcisd, w_ycisd] = cisd_logic(tf6, "30", w_bull_level, w_bear_level, w_bull_index, w_bear_index, w_bull_alarm, w_bear_alarm, w_xcisd, w_ycisd)
+    [tmp_w_bl, tmp_w_bel, tmp_w_bi, tmp_w_bei, tmp_w_ba, tmp_w_bea, tmp_w_x, tmp_w_y] = cisd_logic(tf6, "30", w_bull_level, w_bear_level, w_bull_index, w_bear_index, w_bull_alarm, w_bear_alarm, w_xcisd, w_ycisd)
+    w_bull_level := tmp_w_bl
+    w_bear_level := tmp_w_bel
+    w_bull_index := tmp_w_bi
+    w_bear_index := tmp_w_bei
+    w_bull_alarm := tmp_w_ba
+    w_bear_alarm := tmp_w_bea
+    w_xcisd := tmp_w_x
+    w_ycisd := tmp_w_y
 
 if use_tf7
-    [m_bull_level, m_bear_level, m_bull_index, m_bear_index, m_bull_alarm, m_bear_alarm, m_xcisd, m_ycisd] = cisd_logic(tf7, "60", m_bull_level, m_bear_level, m_bull_index, m_bear_index, m_bull_alarm, m_bear_alarm, m_xcisd, m_ycisd)
+    [tmp_m_bl, tmp_m_bel, tmp_m_bi, tmp_m_bei, tmp_m_ba, tmp_m_bea, tmp_m_x, tmp_m_y] = cisd_logic(tf7, "60", m_bull_level, m_bear_level, m_bull_index, m_bear_index, m_bull_alarm, m_bear_alarm, m_xcisd, m_ycisd)
+    m_bull_level := tmp_m_bl
+    m_bear_level := tmp_m_bel
+    m_bull_index := tmp_m_bi
+    m_bear_index := tmp_m_bei
+    m_bull_alarm := tmp_m_ba
+    m_bear_alarm := tmp_m_bea
+    m_xcisd := tmp_m_x
+    m_ycisd := tmp_m_y
 
 // Optimized label management
 var label[] labels = array.new_label()
