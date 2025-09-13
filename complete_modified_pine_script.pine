@@ -87,92 +87,6 @@ f_reverse_tf(_tf) =>
 
 htf = htf_opt == "Auto" ? f_look_tf(tf) : htf_
 
-// Additional HTF timeframes for 5-minute chart to show all day timeframes
-htf1d = tf == "5" ? "1D" : htf
-htf2d = tf == "5" ? "2D" : htf
-htf3d = tf == "5" ? "3D" : htf
-htf4d = tf == "5" ? "4D" : htf
-htf5d = tf == "5" ? "5D" : htf
-htf6d = tf == "5" ? "6D" : htf
-htf7d = tf == "5" ? "7D" : htf
-htf8d = tf == "5" ? "8D" : htf
-htf9d = tf == "5" ? "9D" : htf
-htf10d = tf == "5" ? "10D" : htf
-htf11d = tf == "5" ? "11D" : htf
-htf12d = tf == "5" ? "12D" : htf
-htf13d = tf == "5" ? "13D" : htf
-htf14d = tf == "5" ? "14D" : htf
-htf15d = tf == "5" ? "15D" : htf
-htf16d = tf == "5" ? "16D" : htf
-htf17d = tf == "5" ? "17D" : htf
-htf19d = tf == "5" ? "19D" : htf
-htf20d = tf == "5" ? "20D" : htf
-htf21d = tf == "5" ? "21D" : htf
-htf23d = tf == "5" ? "23D" : htf
-htf25d = tf == "5" ? "25D" : htf
-htf28d = tf == "5" ? "28D" : htf
-htf31d = tf == "5" ? "31D" : htf
-htf33d = tf == "5" ? "33D" : htf
-htf34d = tf == "5" ? "34D" : htf
-htf37d = tf == "5" ? "37D" : htf
-htf40d = tf == "5" ? "40D" : htf
-htf43d = tf == "5" ? "43D" : htf
-htf45d = tf == "5" ? "45D" : htf
-htf46d = tf == "5" ? "46D" : htf
-htf49d = tf == "5" ? "49D" : htf
-htf53d = tf == "5" ? "53D" : htf
-htf55d = tf == "5" ? "55D" : htf
-htf57d = tf == "5" ? "57D" : htf
-htf59d = tf == "5" ? "59D" : htf
-htf61d = tf == "5" ? "61D" : htf
-htf65d = tf == "5" ? "65D" : htf
-htf69d = tf == "5" ? "69D" : htf
-htf73d = tf == "5" ? "73D" : htf
-htf77d = tf == "5" ? "77D" : htf
-htf81d = tf == "5" ? "81D" : htf
-htf86d = tf == "5" ? "86D" : htf
-htf89d = tf == "5" ? "89D" : htf
-htf91d = tf == "5" ? "91D" : htf
-htf96d = tf == "5" ? "96D" : htf
-htf101d = tf == "5" ? "101D" : htf
-htf106d = tf == "5" ? "106D" : htf
-htf111d = tf == "5" ? "111D" : htf
-htf116d = tf == "5" ? "116D" : htf
-htf121d = tf == "5" ? "121D" : htf
-htf127d = tf == "5" ? "127D" : htf
-htf133d = tf == "5" ? "133D" : htf
-htf139d = tf == "5" ? "139D" : htf
-htf144d = tf == "5" ? "144D" : htf
-htf145d = tf == "5" ? "145D" : htf
-htf151d = tf == "5" ? "151D" : htf
-htf157d = tf == "5" ? "157D" : htf
-htf163d = tf == "5" ? "163D" : htf
-htf169d = tf == "5" ? "169D" : htf
-htf176d = tf == "5" ? "176D" : htf
-htf183d = tf == "5" ? "183D" : htf
-htf190d = tf == "5" ? "190D" : htf
-htf197d = tf == "5" ? "197D" : htf
-htf204d = tf == "5" ? "204D" : htf
-htf211d = tf == "5" ? "211D" : htf
-htf218d = tf == "5" ? "218D" : htf
-htf225d = tf == "5" ? "225D" : htf
-htf233d = tf == "5" ? "233D" : htf
-htf241d = tf == "5" ? "241D" : htf
-htf249d = tf == "5" ? "249D" : htf
-htf257d = tf == "5" ? "257D" : htf
-htf265d = tf == "5" ? "265D" : htf
-htf273d = tf == "5" ? "273D" : htf
-htf281d = tf == "5" ? "281D" : htf
-htf289d = tf == "5" ? "289D" : htf
-htf298d = tf == "5" ? "298D" : htf
-htf307d = tf == "5" ? "307D" : htf
-htf316d = tf == "5" ? "316D" : htf
-htf325d = tf == "5" ? "325D" : htf
-htf334d = tf == "5" ? "334D" : htf
-htf343d = tf == "5" ? "343D" : htf
-htf352d = tf == "5" ? "352D" : htf
-htf361d = tf == "5" ? "361D" : htf
-
 ///////////////////////////////     
 var o0 = open
 var h0 = high
@@ -323,6 +237,36 @@ if showhtf
         htf_box_color = c0 > o0 ? bull_color : c0 < o0 ? bear_color : range_color         
         boxhtf=box.new(left = t0, top = high > h0 ? high : h0 , right = time+1, bottom =low < l0 ? low : l0,xloc = xloc.bar_time,border_width = width_box,border_style = style_box,bgcolor =color.rgb(255, 255, 255, 100) , border_color = htf_box_color  ,text = "",text_color= htf_box_color , text_size=size.tiny ,text_halign = text.align_right,text_valign = text.align_center )
         box.delete(boxhtf[1])
+
+// Show additional HTF boxes for 5-minute chart with all day timeframes
+if showhtf and tf == "5" and htf_opt == "Auto"
+    // Get data for multiple day timeframes
+    [h1d, l1d, c1d, o1d] = request.security(sym, "1D", [high[1], low[1], close[1], open[1]], lookahead=barmerge.lookahead_off)
+    [h2d, l2d, c2d, o2d] = request.security(sym, "2D", [high[1], low[1], close[1], open[1]], lookahead=barmerge.lookahead_off)
+    [h3d, l3d, c3d, o3d] = request.security(sym, "3D", [high[1], low[1], close[1], open[1]], lookahead=barmerge.lookahead_off)
+    [h5d, l5d, c5d, o5d] = request.security(sym, "5D", [high[1], low[1], close[1], open[1]], lookahead=barmerge.lookahead_off)
+    [h10d, l10d, c10d, o10d] = request.security(sym, "10D", [high[1], low[1], close[1], open[1]], lookahead=barmerge.lookahead_off)
+    [h20d, l20d, c20d, o20d] = request.security(sym, "20D", [high[1], low[1], close[1], open[1]], lookahead=barmerge.lookahead_off)
+    [h30d, l30d, c30d, o30d] = request.security(sym, "30D", [high[1], low[1], close[1], open[1]], lookahead=barmerge.lookahead_off)
+    [h50d, l50d, c50d, o50d] = request.security(sym, "50D", [high[1], low[1], close[1], open[1]], lookahead=barmerge.lookahead_off)
+    [h100d, l100d, c100d, o100d] = request.security(sym, "100D", [high[1], low[1], close[1], open[1]], lookahead=barmerge.lookahead_off)
+    [h200d, l200d, c200d, o200d] = request.security(sym, "200D", [high[1], low[1], close[1], open[1]], lookahead=barmerge.lookahead_off)
+    [h300d, l300d, c300d, o300d] = request.security(sym, "300D", [high[1], low[1], close[1], open[1]], lookahead=barmerge.lookahead_off)
+    [h361d, l361d, c361d, o361d] = request.security(sym, "361D", [high[1], low[1], close[1], open[1]], lookahead=barmerge.lookahead_off)
+    
+    // Create HTF boxes for different day timeframes
+    box1d = box.new(left = time - 86400000, top = h1d, right = time, bottom = l1d, xloc = xloc.bar_time, border_width = 1, border_style = line.style_dotted, bgcolor = color.new(bull_color, 90), border_color = bull_color, text = "1D", text_color = bull_color, text_size = size.tiny)
+    box2d = box.new(left = time - 172800000, top = h2d, right = time, bottom = l2d, xloc = xloc.bar_time, border_width = 1, border_style = line.style_dotted, bgcolor = color.new(bear_color, 90), border_color = bear_color, text = "2D", text_color = bear_color, text_size = size.tiny)
+    box3d = box.new(left = time - 259200000, top = h3d, right = time, bottom = l3d, xloc = xloc.bar_time, border_width = 1, border_style = line.style_dotted, bgcolor = color.new(range_color, 90), border_color = range_color, text = "3D", text_color = range_color, text_size = size.tiny)
+    box5d = box.new(left = time - 432000000, top = h5d, right = time, bottom = l5d, xloc = xloc.bar_time, border_width = 1, border_style = line.style_dotted, bgcolor = color.new(color.orange, 90), border_color = color.orange, text = "5D", text_color = color.orange, text_size = size.tiny)
+    box10d = box.new(left = time - 864000000, top = h10d, right = time, bottom = l10d, xloc = xloc.bar_time, border_width = 1, border_style = line.style_dotted, bgcolor = color.new(color.purple, 90), border_color = color.purple, text = "10D", text_color = color.purple, text_size = size.tiny)
+    box20d = box.new(left = time - 1728000000, top = h20d, right = time, bottom = l20d, xloc = xloc.bar_time, border_width = 1, border_style = line.style_dotted, bgcolor = color.new(color.yellow, 90), border_color = color.yellow, text = "20D", text_color = color.yellow, text_size = size.tiny)
+    box30d = box.new(left = time - 2592000000, top = h30d, right = time, bottom = l30d, xloc = xloc.bar_time, border_width = 1, border_style = line.style_dotted, bgcolor = color.new(color.lime, 90), border_color = color.lime, text = "30D", text_color = color.lime, text_size = size.tiny)
+    box50d = box.new(left = time - 4320000000, top = h50d, right = time, bottom = l50d, xloc = xloc.bar_time, border_width = 1, border_style = line.style_dotted, bgcolor = color.new(color.aqua, 90), border_color = color.aqua, text = "50D", text_color = color.aqua, text_size = size.tiny)
+    box100d = box.new(left = time - 8640000000, top = h100d, right = time, bottom = l100d, xloc = xloc.bar_time, border_width = 1, border_style = line.style_dotted, bgcolor = color.new(color.maroon, 90), border_color = color.maroon, text = "100D", text_color = color.maroon, text_size = size.tiny)
+    box200d = box.new(left = time - 17280000000, top = h200d, right = time, bottom = l200d, xloc = xloc.bar_time, border_width = 1, border_style = line.style_dotted, bgcolor = color.new(color.navy, 90), border_color = color.navy, text = "200D", text_color = color.navy, text_size = size.tiny)
+    box300d = box.new(left = time - 25920000000, top = h300d, right = time, bottom = l300d, xloc = xloc.bar_time, border_width = 1, border_style = line.style_dotted, bgcolor = color.new(color.olive, 90), border_color = color.olive, text = "300D", text_color = color.olive, text_size = size.tiny)
+    box361d = box.new(left = time - 31190400000, top = h361d, right = time, bottom = l361d, xloc = xloc.bar_time, border_width = 1, border_style = line.style_dotted, bgcolor = color.new(color.gray, 90), border_color = color.gray, text = "361D", text_color = color.gray, text_size = size.tiny)
 xcolor = swept_color
 if f_tfcon(htf) and timeframe.period != htf and h0 > h1 and close < h1 and o0 < h1 
     boxhtf4=box.new(left = t0, top = h0 , right = time, bottom = h1, xloc = xloc.bar_time,border_width = 1,border_style = line.style_dotted,bgcolor =xcolor , border_color =color.new(color.gray,70) )
