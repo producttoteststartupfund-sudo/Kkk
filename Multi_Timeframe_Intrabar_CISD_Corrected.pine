@@ -483,6 +483,17 @@ checkAndCreateLabel(show, bullishTouch, bearishTouch, tfText, confirmOkBull, con
         manageLabelCount("BT-" + tfText, high, bearishBgColor, bearishTextColor, getLabelStyle(bearishLabelStyle), getLabelSize(labelSize))
 
 // CISD-ok flags per TF within window
+var bool h1_ok_bull = false
+var bool h1_ok_bear = false
+var bool h4_ok_bull = false
+var bool h4_ok_bear = false
+var bool d_ok_bull = false
+var bool d_ok_bear = false
+var bool w_ok_bull = false
+var bool w_ok_bear = false
+var bool m_ok_bull = false
+var bool m_ok_bear = false
+
 h1_ok_bull := use_tf2 and h1_bull_alarm and (h1_touch_dir == 1) and not na(h1_touch_ix) and (bar_index - h1_touch_ix <= cisd_touch_window)
 h1_ok_bear := use_tf2 and h1_bear_alarm and (h1_touch_dir == -1) and not na(h1_touch_ix) and (bar_index - h1_touch_ix <= cisd_touch_window)
 h4_ok_bull := use_tf4 and h4_bull_alarm and (h4_touch_dir == 1) and not na(h4_touch_ix) and (bar_index - h4_touch_ix <= cisd_touch_window)
