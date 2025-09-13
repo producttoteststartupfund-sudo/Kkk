@@ -59,20 +59,16 @@ tf = timeframe.period
 ///////////////////////////////////
 f_look_tf(_tf)=>
     dtf = 
-     _tf == "1"  ? "5" :
-     _tf == "2"  ? "5" :    
-     _tf == "3"  ? "5" :
-     _tf == "5"  ? "5" :
-     _tf == "15" ? "5": 
-     _tf == "30" ? "5":
-     _tf == "60" ? "5" :
-     _tf == "240"? "5" :
-     _tf == "D" ? "5" : 
-     _tf == "W" ? "5" : 
-     _tf == "M" ? "5" :
-     str.contains(_tf, "D") ? "5" :
-     str.contains(_tf, "W") ? "5" :
-     str.contains(_tf, "M") ? "5" : tf
+     _tf == "5" ? "1D" :
+     _tf == "1"  ? "15" :
+     _tf == "2"  ? "60" :    
+     _tf == "3"  ? "30" :
+     _tf == "15" ? "240": 
+     _tf == "30" ? "720":
+     _tf == "60" ? "1D" :
+     _tf == "240"? "1W" :
+     _tf == "D" ? "1M" : 
+     _tf == "W" ? "3M" : tf
     dtf
 
 f_reverse_tf(_tf) =>
@@ -88,7 +84,10 @@ f_reverse_tf(_tf) =>
     else
         array.from(_tf)
 
-htf = htf_opt == "Auto" ? f_look_tf(tf) : htf_         
+// Get all day timeframes array
+day_tfs = f_reverse_tf("5")
+current_day_index = bar_index % array.size(day_tfs)
+htf = htf_opt == "Auto" ? (tf == "5" ? array.get(day_tfs, current_day_index) : f_look_tf(tf)) : htf_         
 ///////////////////////////////     
 var o0 = open
 var h0 = high
